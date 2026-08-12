@@ -49,7 +49,7 @@ public class MainMenuManager : MonoBehaviour
                 affectionTexts[i].text = $"好感度:{SaveData.GetAffection(type)}%";
 
             if (collectionTexts != null && i < collectionTexts.Length && collectionTexts[i] != null)
-                collectionTexts[i].text = $"達成度:{SaveData.GetCollectionCount(type)}/8";
+                collectionTexts[i].text = $"Photo:{SaveData.GetCollectionCount(type)}/8";
         }
     }
 
@@ -91,7 +91,7 @@ public class MainMenuManager : MonoBehaviour
 
         if (SaveData.Mana >= 10)
         {
-            manaTimerText.text = "1マイク回復まであと 0:00:00";
+            manaTimerText.text = "回復まであと 0:00:00";
             return;
         }
 

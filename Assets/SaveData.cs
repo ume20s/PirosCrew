@@ -6,6 +6,8 @@ public static class SaveData
     private const string KEY_MANA = "Mana";
     private const string KEY_LAST_RECOVERY = "LastRecoveryTicks";
     private const string KEY_CAPTAIN_UNLOCKED = "CaptainUnlocked";
+    private const string KEY_BGM_ENABLED = "BgmEnabled";
+    private const string KEY_BGM_VOLUME = "BgmVolume";
 
     public static int GetAffection(CharacterType type)
     {
@@ -51,6 +53,20 @@ public static class SaveData
         set => PlayerPrefs.SetInt(KEY_CAPTAIN_UNLOCKED, value ? 1 : 0);
     }
 
+    // BGMオン/オフ（true = オン）
+    public static bool BgmEnabled
+    {
+        get => PlayerPrefs.GetInt(KEY_BGM_ENABLED, 1) == 1; // デフォルトオン
+        set => PlayerPrefs.SetInt(KEY_BGM_ENABLED, value ? 1 : 0);
+    }
+
+    // BGM音量（0.0f 〜 1.0f）
+    public static float BgmVolume
+    {
+        get => PlayerPrefs.GetFloat(KEY_BGM_VOLUME, 0.7f); // デフォルト0.7
+        set => PlayerPrefs.SetFloat(KEY_BGM_VOLUME, Mathf.Clamp01(value));
+    }
+    
     public static void Save()
     {
         PlayerPrefs.Save();

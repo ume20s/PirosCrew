@@ -25,6 +25,9 @@ public class MainMenuManager : MonoBehaviour
     public GameObject captainAffect;
     public GameObject captainCollec;
 
+    [Header("BGM")]
+    public AudioClip menuBgmClip;
+
     // マナタイマー制御用
     private float timerUpdateInterval = 1.0f; // 1秒ごとに更新
     private float timer = 0f;
@@ -43,6 +46,11 @@ public class MainMenuManager : MonoBehaviour
         LoadAndApplyData();
         UpdateManaDisplay();
         UpdateCaptainVisibility();
+        // メニュー用BGMを流す
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayBGM(menuBgmClip); // menuBgmClipはInspectorで設定
+        }
     }
 
     // Update is called once per frame

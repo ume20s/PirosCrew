@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;  // 追加
 using System;
 
 public class MainMenuManager : MonoBehaviour
@@ -195,7 +196,9 @@ public class MainMenuManager : MonoBehaviour
             return;
         }
 
-        Debug.Log($"{type} が選択されました");
-        // ここにシーン遷移処理を後で追加
+        // 選択キャラを保存してCharacterシーンへ
+        SaveData.SelectedCharacter = type;
+        SaveData.Save();
+        SceneManager.LoadScene("Character");
     }
 }

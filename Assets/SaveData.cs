@@ -8,6 +8,7 @@ public static class SaveData
     private const string KEY_CAPTAIN_UNLOCKED = "CaptainUnlocked";
     private const string KEY_BGM_ENABLED = "BgmEnabled";
     private const string KEY_BGM_VOLUME = "BgmVolume";
+    private const string KEY_SELECTED_CHARACTER = "SelectedCharacter";  // 追加
 
     public static int GetAffection(CharacterType type)
     {
@@ -66,7 +67,14 @@ public static class SaveData
         get => PlayerPrefs.GetFloat(KEY_BGM_VOLUME, 0.7f); // デフォルト0.7
         set => PlayerPrefs.SetFloat(KEY_BGM_VOLUME, Mathf.Clamp01(value));
     }
-    
+
+    // 選択中のキャラクター（メニュー → Characterシーン受け渡し用）
+    public static CharacterType SelectedCharacter
+    {
+        get => (CharacterType)PlayerPrefs.GetInt(KEY_SELECTED_CHARACTER, 0);
+        set => PlayerPrefs.SetInt(KEY_SELECTED_CHARACTER, (int)value);
+    }
+
     public static void Save()
     {
         PlayerPrefs.Save();

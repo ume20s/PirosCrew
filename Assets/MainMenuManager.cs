@@ -26,16 +26,18 @@ public class MainMenuManager : MonoBehaviour
     public GameObject captainCollec;
 
     [Header("BGM")]
-    public AudioClip menuBgmClip;
+    public AudioClip[] menuBgmClips;
 
     // マナタイマー制御用
     private float timerUpdateInterval = 1.0f; // 1秒ごとに更新
     private float timer = 0f;
 
+    // GUILayoutの描画グループエラー対策
+    private bool _needUpdateManaUI = false;
+
     // Start is called before the first frame update
     void Start()
     {
-
         // テスト用（確認後削除）
         // SaveData.SetAffection(CharacterType.Gatchan, 0);
         // SaveData.Mana = 6;
@@ -43,28 +45,50 @@ public class MainMenuManager : MonoBehaviour
         // SaveData.IsCaptainUnlocked = false;
         // SaveData.Save();
 
+        InitializeBgm();
         LoadAndApplyData();
         UpdateManaDisplay();
         UpdateCaptainVisibility();
-        // メニュー用BGMを流す
-        if (AudioManager.Instance != null)
-        {
-            AudioManager.Instance.PlayBGM(menuBgmClip); // menuBgmClipはInspectorで設定
-        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        // 1秒ごとにタイマーとマナ回復をチェック
+        // 1秒周期でマナ更新＆表示チェッカーを駆動
         timer += Time.deltaTime;
         if (timer >= timerUpdateInterval)
         {
             timer = 0f;
-            UpdateManaDisplay();      // 回復チェック + 表示更新
+            RecoverManaIfNeeded();      // 回復チェック
+            _needUpdateManaUI = true;   // UIを更新してもいいよフラグ
         }
     }
 
+    // Updateの最後で安全にUIを反映する
+    private void LateUpdate()
+    {
+        if (_needUpdateManaUI)
+        {
+            _needUpdateManaUI = false;
+            UpdateManaDisplay(); // 実際のUI反映処理
+        }
+    }
+
+    // ランダムBGMの再生処理
+    void InitializeBgm()
+    {
+        if (AudioManager.Instance == null || menuBgmClips == null || menuBgmClips.Length == 0) 
+            return;
+
+        // 10%の確率で0番目、残り90%で1番目
+        int bgmIndex = (UnityEngine.Random.Range(0, 10) == 0) ? 0 : 1;
+        if (bgmIndex < menuBgmClips.Length && menuBgmClips[bgmIndex] != null)
+        {
+            AudioManager.Instance.PlayBGM(menuBgmClips[bgmIndex]);
+        }
+    }
+
+    // 各キャラクター情報の描画・表示制御
     void LoadAndApplyData()
     {
         for (int i = 0; i < 5; i++)
@@ -79,10 +103,9 @@ public class MainMenuManager : MonoBehaviour
         }
     }
 
+    // アイコン・タイマーの表示更新
     void UpdateManaDisplay()
     {
-        RecoverManaIfNeeded();
-
         int currentMana = SaveData.Mana;
 
         // マナアイコンの表示更新
@@ -91,13 +114,15 @@ public class MainMenuManager : MonoBehaviour
             for (int i = 0; i < manaIcons.Length; i++)
             {
                 if (manaIcons[i] != null)
+                {
                     manaIcons[i].enabled = (i < currentMana);
+                }
             }
         }
-
         UpdateManaTimer();
     }
 
+    // 時間経過によるマナ自動回復の計算
     void RecoverManaIfNeeded()
     {
         if (SaveData.Mana >= 10) return; // すでにMAXなら何もしない
@@ -120,13 +145,13 @@ public class MainMenuManager : MonoBehaviour
         }
     }
 
+    // 残り時間タイマーテキストの表示更新
     void UpdateManaTimer()
     {
         if (manaTimerText == null) return;
 
         if (SaveData.Mana >= 10)
         {
-            manaTimerText.text = "回復まであと 0:00:00";
             manaTimerText.text = "MAX";
             return;
         }
@@ -145,6 +170,7 @@ public class MainMenuManager : MonoBehaviour
             remaining.Hours, remaining.Minutes, remaining.Seconds);
     }
 
+    // アキラさんがいたら表示
     void UpdateCaptainVisibility()
     {
         if (captainPhoto != null)

@@ -1,8 +1,8 @@
 public enum CharacterType
 {
-    Gatchan  = 0,    // がっちゃん
-    Allback  = 1,    // おーるばっく
+    Gatchan  = 0,    // がっちゃんさん
+    Allback  = 1,    // おーるばっくさん
     Nesan    = 2,    // ねえさん
-    Yuimarru = 3,    // ゆいまーる
+    Yuimarru = 3,    // ゆいまーるさん
     Captain  = 4     // アキラさん
 }

@@ -3827,7 +3827,7 @@ MonoBehaviour:
   captainAffect: {fileID: 2034552939}
   captainCollec: {fileID: 414588505}
   menuBgmClips:
-  - {fileID: 8300000, guid: 21fc3135a5b34044cae5c23462327e58, type: 3}
+  - {fileID: 8300000, guid: 490b849fe8f961d49aecc3da4b2b2e4a, type: 3}
   - {fileID: 8300000, guid: caff7519331710d49a4c2d1e3f2e0f80, type: 3}
 --- !u!4 &1894554900
 Transform:

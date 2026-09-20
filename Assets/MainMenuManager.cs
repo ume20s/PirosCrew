@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;  // 追加
+using UnityEngine.SceneManagement;
 using System;
 
 public class MainMenuManager : MonoBehaviour

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System;
+using System.Collections;
 
 public class MainMenuManager : MonoBehaviour
 {
@@ -29,12 +30,16 @@ public class MainMenuManager : MonoBehaviour
     [Header("BGM")]
     public AudioClip[] menuBgmClips;
 
+    [Header("キャラクター選択ボイス（0:がっちゃん, 1:おーるばっく, 2:ねえさん, 3:ゆいまーる, 4:キャプテン）")] // 追加
+    public AudioClip[] selectVoiceClips;
+
     // マナタイマー制御用
     private float timerUpdateInterval = 1.0f; // 1秒ごとに更新
     private float timer = 0f;
-
-    // GUILayoutの描画グループエラー対策
     private bool _needUpdateManaUI = false;
+
+    // シーン遷移中の重複タップ防止フラグ
+    private bool isTransitioning = false;
 
     // Start is called before the first frame update
     void Start()
@@ -183,9 +188,10 @@ public class MainMenuManager : MonoBehaviour
         }
     }
 
-    // ボタンから呼び出す用
+    // キャラがタップされた
     public void OnCharacterSelected(int index)
     {
+        if (isTransitioning) return; // 既に遷移中なら連打対策で無視
         if (index < 0 || index > 4) return;
 
         CharacterType type = (CharacterType)index;
@@ -196,9 +202,38 @@ public class MainMenuManager : MonoBehaviour
             return;
         }
 
-        // 選択キャラを保存してCharacterシーンへ
+        // コルーチンを開始してボイス再生〜シーン遷移を実行
+        StartCoroutine(PlayVoiceAndLoadScene(type, index));
+    }
+
+    private IEnumerator PlayVoiceAndLoadScene(CharacterType type, int index)
+    {
+        isTransitioning = true;
+
+        // 選択したキャラを保存
         SaveData.SelectedCharacter = type;
         SaveData.Save();
+
+        // ボイスの取得と再生
+        AudioClip voiceClip = null;
+        if (selectVoiceClips != null && index < selectVoiceClips.Length)
+        {
+            voiceClip = selectVoiceClips[index];
+        }
+
+        if (voiceClip != null && SaveData.SeEnabled && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySE(voiceClip);
+            // 音声の長さ+1.0秒だけ待機（音声ONの時）
+            yield return new WaitForSeconds(voiceClip.length+1.0f);
+        }
+        else
+        {
+            // 音声がない場合や音声OFF時は少しだけ余白を入れて遷移
+            yield return new WaitForSeconds(0.5f);
+        }
+
+        // シーン遷移
         SceneManager.LoadScene("Character");
     }
 }

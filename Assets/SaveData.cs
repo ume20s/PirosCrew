@@ -8,7 +8,9 @@ public static class SaveData
     private const string KEY_CAPTAIN_UNLOCKED = "CaptainUnlocked";
     private const string KEY_BGM_ENABLED = "BgmEnabled";
     private const string KEY_BGM_VOLUME = "BgmVolume";
-    private const string KEY_SELECTED_CHARACTER = "SelectedCharacter";  // 追加
+    private const string KEY_SE_ENABLED = "SeEnabled";
+    private const string KEY_SE_VOLUME = "SeVolume";
+    private const string KEY_SELECTED_CHARACTER = "SelectedCharacter";
 
     public static int GetAffection(CharacterType type)
     {
@@ -66,6 +68,20 @@ public static class SaveData
     {
         get => PlayerPrefs.GetFloat(KEY_BGM_VOLUME, 0.7f); // デフォルト0.7
         set => PlayerPrefs.SetFloat(KEY_BGM_VOLUME, Mathf.Clamp01(value));
+    }
+
+    // 音声/SEオン/オフ（true = オン）
+    public static bool SeEnabled
+    {
+        get => PlayerPrefs.GetInt(KEY_SE_ENABLED, 1) == 1; // デフォルトオン
+        set => PlayerPrefs.SetInt(KEY_SE_ENABLED, value ? 1 : 0);
+    }
+
+    // 音声/SE音量（0.0f 〜 1.0f）
+    public static float SeVolume
+    {
+        get => PlayerPrefs.GetFloat(KEY_SE_VOLUME, 1.0f); // デフォルト1.0
+        set => PlayerPrefs.SetFloat(KEY_SE_VOLUME, Mathf.Clamp01(value));
     }
 
     // 選択中のキャラクター（メニュー → Characterシーン受け渡し用）

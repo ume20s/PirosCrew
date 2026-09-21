@@ -4,7 +4,9 @@ public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
 
+    [Header("Audio Sources")]
     public AudioSource bgmSource;
+    public AudioSource seSource;
 
     void Awake()
     {
@@ -19,13 +21,27 @@ public class AudioManager : MonoBehaviour
             return;
         }
 
-        // AudioSourceが未設定なら自分のものを使う
-        if (bgmSource == null)
-            bgmSource = GetComponent<AudioSource>();
+        // AudioSourceの自動セット（未設定の場合）
+        AudioSource[] sources = GetComponents<AudioSource>();
+        if (bgmSource == null && sources.Length > 0) bgmSource = sources[0];
+        if (seSource == null)
+        {
+            if (sources.Length > 1)
+            {
+                seSource = sources[1];
+            }
+            else
+            {
+                // AudioSourceが1つしかなければ自動で追加
+                seSource = gameObject.AddComponent<AudioSource>();
+            }
+        }
 
         ApplyBgmSettings();
+        ApplySeSettings();
     }
 
+    // BGM用の設定反映
     public void ApplyBgmSettings()
     {
         if (bgmSource == null) return;
@@ -42,6 +58,13 @@ public class AudioManager : MonoBehaviour
             if (bgmSource.isPlaying)
                 bgmSource.Pause();
         }
+    }
+
+    // SE/ボイス用の設定反映
+    public void ApplySeSettings()
+    {
+        if (seSource == null) return;
+        seSource.volume = SaveData.SeEnabled ? SaveData.SeVolume : 0f;
     }
 
     public void PlayBGM(AudioClip clip, bool loop = true)
@@ -62,5 +85,16 @@ public class AudioManager : MonoBehaviour
     {
         if (bgmSource != null)
             bgmSource.Stop();
+    }
+
+    // SE・ボイスを1回再生する関数
+    public void PlaySE(AudioClip clip)
+    {
+        if (seSource == null || clip == null) return;
+        ApplySeSettings();
+        if (SaveData.SeEnabled)
+        {
+            seSource.PlayOneShot(clip, SaveData.SeVolume);
+        }
     }
 }

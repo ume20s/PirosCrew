@@ -3,39 +3,54 @@ using UnityEngine.UI;
 
 public class SettingsManager : MonoBehaviour
 {
-    [Header("UI参照")]
+    [Header("UI参照 - パネル・ボタン")]
     public GameObject settingsPanel;
-    public Toggle bgmToggle;
-    public Slider volumeSlider;
     public Button closeButton;
     public Button openSettingsButton;
+
+    [Header("UI参照 - BGM")]
+    public Toggle bgmToggle;
+    public Slider volumeSlider;
+
+    [Header("UI参照 - Voice/SE")]
+    public Toggle seToggle;
+    public Slider seVolumeSlider;
 
     void Start()
     {
         // 初期値反映
-        bgmToggle.isOn = SaveData.BgmEnabled;
-        volumeSlider.value = SaveData.BgmVolume;
+        if (bgmToggle != null) bgmToggle.isOn = SaveData.BgmEnabled;
+        if (volumeSlider != null) volumeSlider.value = SaveData.BgmVolume;
+        if (seToggle != null) seToggle.isOn = SaveData.SeEnabled;
+        if (seVolumeSlider != null) seVolumeSlider.value = SaveData.SeVolume;
 
         // イベント登録
-        bgmToggle.onValueChanged.AddListener(OnBgmToggleChanged);
-        volumeSlider.onValueChanged.AddListener(OnVolumeChanged);
-        closeButton.onClick.AddListener(CloseSettings);
-        openSettingsButton.onClick.AddListener(OpenSettings);
+        if (bgmToggle != null) bgmToggle.onValueChanged.AddListener(OnBgmToggleChanged);
+        if (volumeSlider != null) volumeSlider.onValueChanged.AddListener(OnVolumeChanged);
+        if (seToggle != null) seToggle.onValueChanged.AddListener(OnSeToggleChanged);
+        if (seVolumeSlider != null) seVolumeSlider.onValueChanged.AddListener(OnSeVolumeChanged);
 
-        settingsPanel.SetActive(false);
+        if (closeButton != null) closeButton.onClick.AddListener(CloseSettings);
+        if (openSettingsButton != null) openSettingsButton.onClick.AddListener(OpenSettings);
+
+        // 最初はセッティングパネルは隠しておく
+        if (settingsPanel != null) settingsPanel.SetActive(false);
     }
 
+    // セッティングパネル開く
     void OpenSettings()
     {
-        settingsPanel.SetActive(true);
+        if (settingsPanel != null) settingsPanel.SetActive(true);
     }
 
+    // セッティングパネル閉じる
     void CloseSettings()
     {
-        settingsPanel.SetActive(false);
+        if (settingsPanel != null) settingsPanel.SetActive(false);
         SaveData.Save();
     }
 
+    // BGM ON/OFF切り替え
     void OnBgmToggleChanged(bool isOn)
     {
         SaveData.BgmEnabled = isOn;
@@ -43,10 +58,27 @@ public class SettingsManager : MonoBehaviour
             AudioManager.Instance.ApplyBgmSettings();
     }
 
+    // BGMボリューム変更
     void OnVolumeChanged(float value)
     {
         SaveData.BgmVolume = value;
         if (AudioManager.Instance != null)
             AudioManager.Instance.ApplyBgmSettings();
+    }
+
+    // 音声ON/OFF切り替え
+    void OnSeToggleChanged(bool isOn)
+    {
+        SaveData.SeEnabled = isOn;
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.ApplySeSettings();
+    }
+
+    // 音声ボリューム変更
+    void OnSeVolumeChanged(float value)
+    {
+        SaveData.SeVolume = value;
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.ApplySeSettings();
     }
 }

@@ -45,11 +45,11 @@ public class MainMenuManager : MonoBehaviour
     void Start()
     {
         // テスト用（確認後削除）
-        SaveData.SetAffection(CharacterType.Gatchan, 0);
-        SaveData.Mana = 6;
-        SaveData.LastRecoveryTime = DateTime.Now.AddHours(-1.99);
+        // SaveData.SetAffection(CharacterType.Gatchan, 0);
+        // SaveData.Mana = 10;
+        // SaveData.LastRecoveryTime = DateTime.Now.AddHours(0);
         SaveData.IsCaptainUnlocked = true;
-        SaveData.Save();
+        // SaveData.Save();
 
         InitializeBgm();
         LoadAndApplyData();
@@ -230,8 +230,8 @@ public class MainMenuManager : MonoBehaviour
         if (voiceClip != null && SaveData.SeEnabled && AudioManager.Instance != null)
         {
             AudioManager.Instance.PlaySE(voiceClip);
-            // 音声の長さ分だけ待機（キャラのセリフをしっかり聞かせる）
-            yield return new WaitForSeconds(voiceClip.length+0.5f);
+            // 音声の長さ+0.2秒だけ待機（キャラのセリフをしっかり聞かせる）
+            yield return new WaitForSeconds(voiceClip.length+0.2f);
         }
         else
         {

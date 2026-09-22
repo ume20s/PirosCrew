@@ -66,7 +66,7 @@ public static class SaveData
     // BGM音量（0.0f 〜 1.0f）
     public static float BgmVolume
     {
-        get => PlayerPrefs.GetFloat(KEY_BGM_VOLUME, 0.4f); // デフォルト0.4
+        get => PlayerPrefs.GetFloat(KEY_BGM_VOLUME, 0.8f); // デフォルト0.8
         set => PlayerPrefs.SetFloat(KEY_BGM_VOLUME, Mathf.Clamp01(value));
     }
 

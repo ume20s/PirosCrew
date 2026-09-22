@@ -13,7 +13,11 @@ public class CharacterItemData
 
 public class CharacterManager : MonoBehaviour
 {
-    [Header("キャラクター設定情報 (0:がっちゃん〜4:キャプテン)")]
+    [Header("背景画像")]
+    public Image backgroundImage;          // Canvas内のBackground画像
+    public Sprite[] characterBackgrounds;  // 各キャラの背景写真
+
+    [Header("キャラクター設定情報")]
     public Sprite[] defaultCharacterPhotos; // 各キャラの待機状態の写真
     public AudioClip[] characterBgms;       // 各キャラ専用BGM
 
@@ -89,6 +93,13 @@ public class CharacterManager : MonoBehaviour
     void InitializeUI()
     {
         int charIndex = (int)currentCharacter;
+
+        // --- 1. 背景写真の設定 ---
+        if (backgroundImage != null && characterBackgrounds != null && charIndex < characterBackgrounds.Length)
+        {
+            if (characterBackgrounds[charIndex] != null)
+                backgroundImage.sprite = characterBackgrounds[charIndex];
+        }
 
         // --- 1. 写真と吹き出しの設定 ---
         if (defaultCharacterPhotos != null && charIndex < defaultCharacterPhotos.Length)

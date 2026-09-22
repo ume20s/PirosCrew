@@ -4818,6 +4818,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c822e60794fd584ba8f949b81bffcbd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundImage: {fileID: 1226706948}
+  characterBackgrounds:
+  - {fileID: 21300000, guid: 0b0d26c6dafc0cd4cb472e595e8d0f1d, type: 3}
+  - {fileID: 21300000, guid: 9ed7444e1f37b2444bb73474d52110b3, type: 3}
+  - {fileID: 21300000, guid: 940450f6925569e4f84c3cb21cf44a26, type: 3}
+  - {fileID: 21300000, guid: 805bb7bf1967050478d5a7f185af5413, type: 3}
+  - {fileID: 21300000, guid: d89be365d65b1fb48afd874c5db9da1f, type: 3}
   defaultCharacterPhotos:
   - {fileID: 21300000, guid: 114301d77627fd944a6c4c1c15c536ce, type: 3}
   - {fileID: 21300000, guid: 8a40ffd4133e8e44db42b572bdeca4bc, type: 3}

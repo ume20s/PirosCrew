@@ -45,11 +45,11 @@ public class MainMenuManager : MonoBehaviour
     void Start()
     {
         // テスト用（確認後削除）
-        // SaveData.SetAffection(CharacterType.Gatchan, 0);
-        // SaveData.Mana = 10;
-        // SaveData.LastRecoveryTime = DateTime.Now.AddHours(0);
+        SaveData.SetAffection(CharacterType.Gatchan, 20);
+        SaveData.Mana = 8;
+        SaveData.LastRecoveryTime = DateTime.Now.AddHours(-1.99);
         SaveData.IsCaptainUnlocked = true;
-        // SaveData.Save();
+        SaveData.Save();
 
         InitializeBgm();
         LoadAndApplyData();

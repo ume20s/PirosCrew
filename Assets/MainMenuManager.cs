@@ -45,11 +45,11 @@ public class MainMenuManager : MonoBehaviour
     void Start()
     {
         // テスト用（確認後削除）
-        // SaveData.SetAffection(CharacterType.Gatchan, 0);
-        // SaveData.Mana = 6;
-        // SaveData.LastRecoveryTime = DateTime.Now.AddHours(-1.99);
-        // SaveData.IsCaptainUnlocked = false;
-        // SaveData.Save();
+        SaveData.SetAffection(CharacterType.Gatchan, 0);
+        SaveData.Mana = 6;
+        SaveData.LastRecoveryTime = DateTime.Now.AddHours(-1.99);
+        SaveData.IsCaptainUnlocked = true;
+        SaveData.Save();
 
         InitializeBgm();
         LoadAndApplyData();
@@ -214,6 +214,12 @@ public class MainMenuManager : MonoBehaviour
         SaveData.SelectedCharacter = type;
         SaveData.Save();
 
+        // シーン遷移前にBGMを停止して静かにする
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopBGM();
+        }
+
         // ボイスの取得と再生
         AudioClip voiceClip = null;
         if (selectVoiceClips != null && index < selectVoiceClips.Length)
@@ -224,8 +230,8 @@ public class MainMenuManager : MonoBehaviour
         if (voiceClip != null && SaveData.SeEnabled && AudioManager.Instance != null)
         {
             AudioManager.Instance.PlaySE(voiceClip);
-            // 音声の長さ+1.0秒だけ待機（音声ONの時）
-            yield return new WaitForSeconds(voiceClip.length+1.0f);
+            // 音声の長さ分だけ待機（キャラのセリフをしっかり聞かせる）
+            yield return new WaitForSeconds(voiceClip.length+0.5f);
         }
         else
         {
@@ -236,4 +242,6 @@ public class MainMenuManager : MonoBehaviour
         // シーン遷移
         SceneManager.LoadScene("Character");
     }
+
+
 }

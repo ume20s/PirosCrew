@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class SettingsManager : MonoBehaviour
@@ -16,6 +17,9 @@ public class SettingsManager : MonoBehaviour
     public Toggle seToggle;
     public Slider seVolumeSlider;
 
+    [Header("シーン遷移用")]
+    public Button backToMenuButton;
+
     void Start()
     {
         // 初期値反映
@@ -32,6 +36,7 @@ public class SettingsManager : MonoBehaviour
 
         if (closeButton != null) closeButton.onClick.AddListener(CloseSettings);
         if (openSettingsButton != null) openSettingsButton.onClick.AddListener(OpenSettings);
+        if (backToMenuButton != null) backToMenuButton.onClick.AddListener(BackToMainMenu);
 
         // 最初はセッティングパネルは隠しておく
         if (settingsPanel != null) settingsPanel.SetActive(false);
@@ -80,5 +85,12 @@ public class SettingsManager : MonoBehaviour
         SaveData.SeVolume = value;
         if (AudioManager.Instance != null)
             AudioManager.Instance.ApplySeSettings();
+    }
+
+    // メインメニューへ戻る
+    void BackToMainMenu()
+    {
+        SaveData.Save(); // 念のため保存
+        SceneManager.LoadScene("MainMenu");
     }
 }

@@ -87,14 +87,24 @@ public class AudioManager : MonoBehaviour
             bgmSource.Stop();
     }
 
-    // SE・ボイスを1回再生する関数
-    public void PlaySE(AudioClip clip)
+    // SE・ボイスを1回再生
+    public void PlaySE(AudioClip clip, bool stopPrevious = false)
     {
-        if (seSource == null || clip == null) return;
-        ApplySeSettings();
-        if (SaveData.SeEnabled)
+        if (clip == null || seSource == null) return;
+
+        // stopPreviousがtrueなら、前に鳴っていた音を一度止める
+        if (stopPrevious)
         {
-            seSource.PlayOneShot(clip, SaveData.SeVolume);
+            seSource.Stop();
+            seSource.clip = clip;
+            seSource.Play();
+        }
+        else
+        {
+            // 重ねて鳴らしたい場合（ポンポン押した時の効果音など）
+            seSource.PlayOneShot(clip);
         }
     }
+
+
 }

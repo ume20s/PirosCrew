@@ -96,11 +96,19 @@ public class CharacterManager : MonoBehaviour
         { 2,  8, 9, 10, 7 },  // 3: ゆいまーるさん
         { 10, 10, 10, 10, 10 } // 4: キャプテン
     };
+    private Vector2 popTextDefaultPos; // 好感度ポップアップ初期位置保存用
 
     void Start()
     {
         
         currentCharacter = SaveData.SelectedCharacter;  // 選択キャラクターを取得
+
+        // ポップアップテキストの初期位置を保存
+        if (affectionPopText != null)
+        {
+            popTextDefaultPos = affectionPopText.rectTransform.anchoredPosition;
+        }
+
         InitializeUI();                 // 画面の初期化（写真、ゲージ、ゆいまーるさん専用UIのオンオフなど）
         PlayCharacterBGM();             // キャラクター専用BGMの再生
     }
@@ -240,11 +248,9 @@ public class CharacterManager : MonoBehaviour
 
             if (isRepeat)
             {
-                // 全アイテム共通の連続用ボイスを参照
                 clipToPlay = voiceData.repeatVoice;
             }
 
-            // 連続用ボイスが未設定（null）の場合、または通常選択の場合は各アイテムのボイスを再生
             if (clipToPlay == null)
             {
                 if (voiceData.itemVoices != null && itemIndex < voiceData.itemVoices.Length)
@@ -253,10 +259,10 @@ public class CharacterManager : MonoBehaviour
                 }
             }
 
-            // 音声再生
+            // 音声再生（第2引数に true を指定して上書き再生にする）
             if (clipToPlay != null)
             {
-                AudioManager.Instance.PlaySE(clipToPlay);
+                AudioManager.Instance.PlaySE(clipToPlay, stopPrevious: true);
             }
         }
     }
@@ -290,7 +296,7 @@ public class CharacterManager : MonoBehaviour
         return itemAffectionValues[charIndex, clampedItemIndex];
     }
 
-    // 好感度増減の演出（テキスト＆SE）
+    // 好感度増減のポップアップ
     private void ShowAffectionPop(int amount)
     {
         // SE再生
@@ -303,28 +309,61 @@ public class CharacterManager : MonoBehaviour
             AudioManager.Instance.PlaySE(downSe);
         }
 
-        // ポップアップ表示
         if (affectionPopText == null) return;
 
+        // 既に再生中のアニメーションがあれば停止して初期位置に戻す
         if (popTextCoroutine != null)
         {
             StopCoroutine(popTextCoroutine);
+            affectionPopText.rectTransform.anchoredPosition = popTextDefaultPos;
         }
 
-        if (amount > 0)
-        {
-            affectionPopText.text = $"+{amount}";
-            affectionPopText.color = new Color(0.2f, 0.8f, 0.2f); // 緑色
-        }
-        else
-        {
-            affectionPopText.text = $"{amount}";
-            affectionPopText.color = new Color(0.9f, 0.2f, 0.2f); // 赤色
-        }
-
-        affectionPopText.gameObject.SetActive(true);
-        popTextCoroutine = StartCoroutine(HidePopTextAfterDelay(3.0f));
+        // アニメーションコルーチンの開始
+        popTextCoroutine = StartCoroutine(AnimateAffectionPop(amount));
     }
+
+    // ポップアップの移動＆フェードアウトを行うコルーチン
+    private IEnumerator AnimateAffectionPop(int amount)
+    {
+        affectionPopText.gameObject.SetActive(true);
+
+        RectTransform rect = affectionPopText.rectTransform;
+        rect.anchoredPosition = popTextDefaultPos; // 初期位置にリセット
+
+        // 上昇（緑）/ 下降（赤）の色設定
+        Color baseColor = (amount > 0) ? new Color(0.0f, 0.5f, 0.0f, 1f) : new Color(0.9f, 0.1f, 0.1f, 1f);
+        affectionPopText.text = (amount > 0) ? $"+{amount}" : $"{amount}";
+
+        float duration = 0.8f;                   // アニメーションの時間（秒）
+        float moveY = (amount > 0) ? 50f : -50f; // 移動距離（上昇は+50、下降は-50）
+
+        Vector2 startPos = popTextDefaultPos;
+        Vector2 endPos = popTextDefaultPos + new Vector2(0, moveY);
+
+        float timer = 0f;
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            float t = timer / duration;
+
+            // 1. 位置の移動（イージングっぽく上/下へ移動）
+            rect.anchoredPosition = Vector2.Lerp(startPos, endPos, t);
+
+            // 2. アルファ値（透明度）を 1.0 から 0.0 へフェードアウト
+            Color c = baseColor;
+            c.a = Mathf.Lerp(1f, 0f, t);
+            affectionPopText.color = c;
+
+            yield return null; // 1フレーム待機
+        }
+
+        // アニメーション終了処理
+        affectionPopText.gameObject.SetActive(false);
+        rect.anchoredPosition = popTextDefaultPos; // 次回用に初期位置へ復帰
+    }
+
+
+
 
     private IEnumerator HidePopTextAfterDelay(float delay)
     {

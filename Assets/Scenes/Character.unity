@@ -4934,6 +4934,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c822e60794fd584ba8f949b81bffcbd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  voiceLinesCsv: {fileID: 4900000, guid: 7a838e69a316c294990d50154c7d0828, type: 3}
   backgroundImage: {fileID: 1226706948}
   characterBackgrounds:
   - {fileID: 21300000, guid: 0b0d26c6dafc0cd4cb472e595e8d0f1d, type: 3}

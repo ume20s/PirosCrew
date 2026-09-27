@@ -25,6 +25,10 @@ public class CharacterVoiceData
 
 public class CharacterManager : MonoBehaviour
 {
+
+    [Header("セリフデータ (CSV)")]
+    public TextAsset voiceLinesCsv;         // VoiceLines.csv
+
     [Header("背景画像")]
     public Image backgroundImage;          // Canvas内のBackground画像
     public Sprite[] characterBackgrounds;  // 各キャラの背景写真
@@ -73,6 +77,7 @@ public class CharacterManager : MonoBehaviour
     public Slider allbackSlider;
     public Slider nesanSlider;
 
+    // 現在の選択キャラクターと直近の選択アイテム
     private CharacterType currentCharacter;
     private int lastUsedItemIndex = -1;
     
@@ -81,7 +86,12 @@ public class CharacterManager : MonoBehaviour
     private float timer = 0f;
     private bool _needUpdateManaUI = false;
 
-    private Coroutine popTextCoroutine;
+    // テキスト表示用コルーチン
+    private Coroutine popTextCoroutine;     // 好感度上下ポップアップ
+    private Coroutine talkCoroutine;        // セリフ表示制御
+
+    // CSVから読み込んだセリフを格納する2次元配列 [キャラ番号(0~4), アイテム(0~4:通常, 5:連続)]
+    private string[,] loadedVoiceLines = new string[5, 6];
 
     // キャラクターの表示名リスト
     private readonly string[] characterNames = { "がっちゃん", "おーるばっく", "ねえさん", "ゆいまーる", "キャプテン" };
@@ -109,8 +119,42 @@ public class CharacterManager : MonoBehaviour
             popTextDefaultPos = affectionPopText.rectTransform.anchoredPosition;
         }
 
+        LoadVoiceLinesFromCsv();        // CSVセリフデータの読み込み
         InitializeUI();                 // 画面の初期化（写真、ゲージ、ゆいまーるさん専用UIのオンオフなど）
         PlayCharacterBGM();             // キャラクター専用BGMの再生
+    }
+
+    // CSVファイルを配列に格納する処理
+    private void LoadVoiceLinesFromCsv()
+    {
+        if (voiceLinesCsv == null)
+        {
+            Debug.LogWarning("セリフCSVファイルがセットされていません。");
+            return;
+        }
+
+        // 改行コードで1行ずつ分割
+        string[] lines = voiceLinesCsv.text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+
+        // 1行目はヘッダーなので i = 1 からスタート
+        for (int i = 1; i < lines.Length; i++)
+        {
+            string[] values = lines[i].Split(','); // カンマで分割
+
+            if (values.Length >= 7)
+            {
+                if (int.TryParse(values[0].Trim(), out int charIdx) && charIdx >= 0 && charIdx < 5)
+                {
+                    // アイテム0〜4のセリフ
+                    for (int j = 0; j < 5; j++)
+                    {
+                        loadedVoiceLines[charIdx, j] = values[j + 1].Trim();
+                    }
+                    // 連続選択時のセリフ (インデックス5に格納)
+                    loadedVoiceLines[charIdx, 5] = values[6].Trim();
+                }
+            }
+        }
     }
 
     void Update()
@@ -122,6 +166,12 @@ public class CharacterManager : MonoBehaviour
             timer = 0f;
             RecoverManaIfNeeded();
             _needUpdateManaUI = true;
+        }
+
+        // セリフ表示中に画面をタップしたら吹き出し非表示
+        if (talkBase != null && talkBase.activeSelf && Input.GetMouseButtonDown(0))
+        {
+            ResetToDefaultState();
         }
     }
 
@@ -193,6 +243,20 @@ public class CharacterManager : MonoBehaviour
         UpdateManaDisplay();
     }
 
+    // 吹き出し非表示に戻す処理
+    private void ResetToDefaultState()
+    {
+        if (talkCoroutine != null)
+        {
+            StopCoroutine(talkCoroutine);
+            talkCoroutine = null;
+        }
+
+        if (talkBase != null) talkBase.SetActive(false);
+        if (talkFlame != null) talkFlame.SetActive(false);
+    }
+
+
     // アイテムボタンタップ時の処理
     public void OnItemClicked(int itemIndex)
     {
@@ -213,7 +277,7 @@ public class CharacterManager : MonoBehaviour
 
         // 3. アイテム専用ボイスの再生
         bool isRepeat = (itemIndex == lastUsedItemIndex);
-        PlayItemVoice(itemIndex, isRepeat);
+        PlayItemVoiceAndText(itemIndex, isRepeat);
 
         // 4. 好感度の変化計算
         int changeValue = CalculateAffectionChange(itemIndex);
@@ -237,34 +301,69 @@ public class CharacterManager : MonoBehaviour
         lastUsedItemIndex = itemIndex;
     }
 
-    // アイテムごとのボイス再生
-    private void PlayItemVoice(int itemIndex, bool isRepeat)
+    // ボイス再生と吹き出し（TalkBase/TalkFlame）のセリフ表示制御
+    private void PlayItemVoiceAndText(int itemIndex, bool isRepeat)
     {
         int charIndex = (int)currentCharacter;
+        AudioClip clipToPlay = null;
+        string textToDisplay = "";
+
+        // 1. ボイスAudioClipの取得
         if (characterItemVoices != null && charIndex < characterItemVoices.Length)
         {
             CharacterVoiceData voiceData = characterItemVoices[charIndex];
-            AudioClip clipToPlay = null;
-
             if (isRepeat)
             {
                 clipToPlay = voiceData.repeatVoice;
             }
 
-            if (clipToPlay == null)
+            if (clipToPlay == null && voiceData.itemVoices != null && itemIndex < voiceData.itemVoices.Length)
             {
-                if (voiceData.itemVoices != null && itemIndex < voiceData.itemVoices.Length)
-                {
-                    clipToPlay = voiceData.itemVoices[itemIndex];
-                }
-            }
-
-            // 音声再生（第2引数に true を指定して上書き再生にする）
-            if (clipToPlay != null)
-            {
-                AudioManager.Instance.PlaySE(clipToPlay, stopPrevious: true);
+                clipToPlay = voiceData.itemVoices[itemIndex];
             }
         }
+
+        // 2. CSVテキストの取得
+        if (isRepeat)
+        {
+            textToDisplay = loadedVoiceLines[charIndex, 5]; // 連続時テキスト
+        }
+        else
+        {
+            textToDisplay = loadedVoiceLines[charIndex, itemIndex]; // 通常時テキスト
+        }
+
+        // 3. 音声再生（上書き再生）
+        if (clipToPlay != null)
+        {
+            AudioManager.Instance.PlaySE(clipToPlay, stopPrevious: true);
+        }
+
+        // 4. セリフ表示の呼び出し
+        if (talkCoroutine != null)
+        {
+            StopCoroutine(talkCoroutine);
+        }
+        talkCoroutine = StartCoroutine(ShowTalkRoutine(textToDisplay, clipToPlay != null ? clipToPlay.length : 2.0f));
+    }
+
+    // セリフ表示コルーチン（ボイスの長さに合わせて自動非表示）
+    private IEnumerator ShowTalkRoutine(string message, float displayTime)
+    {
+        if (talkNameText != null) talkNameText.text = characterNames[(int)currentCharacter];
+        if (talkMessageText != null) talkMessageText.text = message;
+
+        if (talkBase != null) talkBase.SetActive(true);
+        if (talkFlame != null) talkFlame.SetActive(true);
+
+        // 音声の長さに合わせて表示を維持（最低1秒は表示）
+        float duration = Mathf.Max(1.0f, displayTime+0.5f);
+        yield return new WaitForSeconds(duration);
+
+        // 表示終了後、吹き出しを隠す
+        if (talkBase != null) talkBase.SetActive(false);
+        if (talkFlame != null) talkFlame.SetActive(false);
+        talkCoroutine = null;
     }
 
     // 好感度変化量の計算

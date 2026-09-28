@@ -5,6 +5,7 @@ public static class SaveData
 {
     private const string KEY_MANA = "Mana";
     private const string KEY_LAST_RECOVERY = "LastRecoveryTicks";
+    private const string KEY_LAST_AFFECTION_DECAY = "LastAffectionDecayTicks";
     private const string KEY_CAPTAIN_UNLOCKED = "CaptainUnlocked";
     private const string KEY_BGM_ENABLED = "BgmEnabled";
     private const string KEY_BGM_VOLUME = "BgmVolume";
@@ -38,6 +39,7 @@ public static class SaveData
         set => PlayerPrefs.SetInt(KEY_MANA, Mathf.Clamp(value, 0, 10));
     }
 
+    // マナ最終回復時間
     public static DateTime LastRecoveryTime
     {
         get
@@ -48,6 +50,50 @@ public static class SaveData
             return DateTime.Now;
         }
         set => PlayerPrefs.SetString(KEY_LAST_RECOVERY, value.Ticks.ToString());
+    }
+
+    // 好感度最終低下計算時間
+    public static DateTime LastAffectionDecayTime
+    {
+        get
+        {
+            string str = PlayerPrefs.GetString(KEY_LAST_AFFECTION_DECAY, "");
+            if (long.TryParse(str, out long ticks))
+                return new DateTime(ticks);
+            return DateTime.Now;
+        }
+        set => PlayerPrefs.SetString(KEY_LAST_AFFECTION_DECAY, value.Ticks.ToString());
+    }
+
+    // 時間経過による好感度低下処理
+    public static bool ApplyAffectionDecay()
+    {
+        DateTime last = LastAffectionDecayTime;
+        TimeSpan elapsed = DateTime.Now - last;
+
+        // 2時間（7200秒）経過した回数を計算
+        int decayCount = (int)(elapsed.TotalHours / 2.0);
+
+        if (decayCount > 0)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                CharacterType type = (CharacterType)i;
+
+                // 8枚コンプリート済みのキャラは好感度が下がらない
+                if (GetCollectionCount(type) >= 8) continue;
+
+                int current = GetAffection(type);
+                int newAffection = Mathf.Max(0, current - decayCount); // 0未満にはならない
+                SetAffection(type, newAffection);
+            }
+
+            // 経過した時間分だけ記録日時を進める
+            LastAffectionDecayTime = last.AddHours(decayCount * 2);
+            Save();
+            return true; // 変化があった場合trueを返す
+        }
+        return false;
     }
 
     public static bool IsCaptainUnlocked

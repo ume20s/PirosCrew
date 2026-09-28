@@ -45,11 +45,18 @@ public class MainMenuManager : MonoBehaviour
     void Start()
     {
         // テスト用（確認後削除）
-        SaveData.SetAffection(CharacterType.Gatchan, 20);
+        SaveData.SetAffection(CharacterType.Gatchan, 80);
+        SaveData.SetAffection(CharacterType.Allback, 30);
+        SaveData.SetAffection(CharacterType.Nesan, 40);
+        SaveData.SetAffection(CharacterType.Yuimarru, 1);
+        SaveData.LastAffectionDecayTime = DateTime.Now.AddHours(-8);
         SaveData.Mana = 8;
         SaveData.LastRecoveryTime = DateTime.Now.AddHours(-1.99);
         SaveData.IsCaptainUnlocked = true;
         SaveData.Save();
+
+        // まず好感度低下処理を実行
+        SaveData.ApplyAffectionDecay();
 
         InitializeBgm();
         LoadAndApplyData();
@@ -66,6 +73,12 @@ public class MainMenuManager : MonoBehaviour
         {
             timer = 0f;
             RecoverManaIfNeeded();      // 回復チェック
+
+            // 好感度低下のチェック
+            if (SaveData.ApplyAffectionDecay())
+            {
+                LoadAndApplyData();
+            }
             _needUpdateManaUI = true;   // UIを更新してもいいよフラグ
         }
     }

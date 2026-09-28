@@ -119,6 +119,9 @@ public class CharacterManager : MonoBehaviour
             popTextDefaultPos = affectionPopText.rectTransform.anchoredPosition;
         }
 
+        // 好感度低下のチェック
+        SaveData.ApplyAffectionDecay();
+
         LoadVoiceLinesFromCsv();        // CSVセリフデータの読み込み
         InitializeUI();                 // 画面の初期化（写真、ゲージ、ゆいまーるさん専用UIのオンオフなど）
         PlayCharacterBGM();             // キャラクター専用BGMの再生
@@ -165,6 +168,12 @@ public class CharacterManager : MonoBehaviour
         {
             timer = 0f;
             RecoverManaIfNeeded();
+
+            // 好感度低下チェック（時間経過で下がった場合、スライダー表示を自動更新）
+            if (SaveData.ApplyAffectionDecay())
+            {
+                RefreshAffectionSliders();
+            }
             _needUpdateManaUI = true;
         }
 
@@ -364,6 +373,21 @@ public class CharacterManager : MonoBehaviour
         if (talkBase != null) talkBase.SetActive(false);
         if (talkFlame != null) talkFlame.SetActive(false);
         talkCoroutine = null;
+    }
+
+    // 好感度スライダー表示の再更新メソッド
+    private void RefreshAffectionSliders()
+    {
+        int currentAffection = SaveData.GetAffection(currentCharacter);
+        if (mainAffectionSlider != null) mainAffectionSlider.value = currentAffection;
+
+        // ゆいまーるさんの場合は他3人のスライダーも更新
+        if (currentCharacter == CharacterType.Yuimarru)
+        {
+            if (gatchanSlider != null) gatchanSlider.value = SaveData.GetAffection(CharacterType.Gatchan);
+            if (allbackSlider != null) allbackSlider.value = SaveData.GetAffection(CharacterType.Allback);
+            if (nesanSlider != null) nesanSlider.value = SaveData.GetAffection(CharacterType.Nesan);
+        }
     }
 
     // 好感度変化量の計算

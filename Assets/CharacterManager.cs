@@ -23,6 +23,17 @@ public class CharacterVoiceData
     public AudioClip repeatVoice;
 }
 
+// キャラクターごとのアイテムタップ時画像データ
+[System.Serializable]
+public class CharacterPhotoData
+{
+    [Header("通常時画像 (アイテム0〜4)")]
+    public Sprite[] itemPhotos = new Sprite[5];
+
+    [Header("同じ物を選んだ時画像")]
+    public Sprite repeatPhoto;
+}
+
 public class CharacterManager : MonoBehaviour
 {
 
@@ -44,6 +55,10 @@ public class CharacterManager : MonoBehaviour
     // キャラクターごとのアイテムボイス
     [Header("キャラクター×アイテムボイス")]
     public CharacterVoiceData[] characterItemVoices;
+
+    // キャラクターごとのアイテム対応写真
+    [Header("キャラクター×アイテム写真")]
+    public CharacterPhotoData[] characterItemPhotos;
 
     [Header("効果音 (SE)")]
     public AudioClip upSe;   // 好感度上昇SE
@@ -252,7 +267,7 @@ public class CharacterManager : MonoBehaviour
         UpdateManaDisplay();
     }
 
-    // 吹き出し非表示に戻す処理
+    // 吹き出し非表示＋キャラクター画像を待機写真に戻す処理
     private void ResetToDefaultState()
     {
         if (talkCoroutine != null)
@@ -263,8 +278,17 @@ public class CharacterManager : MonoBehaviour
 
         if (talkBase != null) talkBase.SetActive(false);
         if (talkFlame != null) talkFlame.SetActive(false);
-    }
 
+        // キャラの待機写真に戻す
+        int charIndex = (int)currentCharacter;
+        if (characterPhoto != null && defaultCharacterPhotos != null && charIndex < defaultCharacterPhotos.Length)
+        {
+            if (defaultCharacterPhotos[charIndex] != null)
+            {
+                characterPhoto.sprite = defaultCharacterPhotos[charIndex];
+            }
+        }
+    }
 
     // アイテムボタンタップ時の処理
     public void OnItemClicked(int itemIndex)
@@ -310,12 +334,13 @@ public class CharacterManager : MonoBehaviour
         lastUsedItemIndex = itemIndex;
     }
 
-    // ボイス再生と吹き出し（TalkBase/TalkFlame）のセリフ表示制御
+    // ボイス・テキスト再生と同時にキャラクター画像も切り替える
     private void PlayItemVoiceAndText(int itemIndex, bool isRepeat)
     {
         int charIndex = (int)currentCharacter;
         AudioClip clipToPlay = null;
         string textToDisplay = "";
+        Sprite photoToDisplay = null;
 
         // 1. ボイスAudioClipの取得
         if (characterItemVoices != null && charIndex < characterItemVoices.Length)
@@ -332,23 +357,51 @@ public class CharacterManager : MonoBehaviour
             }
         }
 
-        // 2. CSVテキストの取得
+        // 2. キャラクター写真Spriteの取得（★追加）
+        if (characterItemPhotos != null && charIndex < characterItemPhotos.Length)
+        {
+            CharacterPhotoData photoData = characterItemPhotos[charIndex];
+            if (isRepeat)
+            {
+                photoToDisplay = photoData.repeatPhoto;
+            }
+
+            if (photoToDisplay == null && photoData.itemPhotos != null && itemIndex < photoData.itemPhotos.Length)
+            {
+                photoToDisplay = photoData.itemPhotos[itemIndex];
+            }
+        }
+
+        // 写真が見つかった場合は切り替え、未設定の場合はデフォルト待機写真
+        if (characterPhoto != null)
+        {
+            if (photoToDisplay != null)
+            {
+                characterPhoto.sprite = photoToDisplay;
+            }
+            else if (defaultCharacterPhotos != null && charIndex < defaultCharacterPhotos.Length)
+            {
+                characterPhoto.sprite = defaultCharacterPhotos[charIndex];
+            }
+        }
+
+        // 3. CSVテキストの取得
         if (isRepeat)
         {
-            textToDisplay = loadedVoiceLines[charIndex, 5]; // 連続時テキスト
+            textToDisplay = loadedVoiceLines[charIndex, 5];
         }
         else
         {
-            textToDisplay = loadedVoiceLines[charIndex, itemIndex]; // 通常時テキスト
+            textToDisplay = loadedVoiceLines[charIndex, itemIndex];
         }
 
-        // 3. 音声再生（上書き再生）
+        // 4. 音声再生（上書き再生）
         if (clipToPlay != null)
         {
             AudioManager.Instance.PlaySE(clipToPlay, stopPrevious: true);
         }
 
-        // 4. セリフ表示の呼び出し
+        // 5. セリフ表示の呼び出し
         if (talkCoroutine != null)
         {
             StopCoroutine(talkCoroutine);
@@ -369,10 +422,8 @@ public class CharacterManager : MonoBehaviour
         float duration = Mathf.Max(1.0f, displayTime+0.5f);
         yield return new WaitForSeconds(duration);
 
-        // 表示終了後、吹き出しを隠す
-        if (talkBase != null) talkBase.SetActive(false);
-        if (talkFlame != null) talkFlame.SetActive(false);
-        talkCoroutine = null;
+        // 表示終了後、吹き出しを隠すのと同時にキャラ画像を待機状態へ戻す
+        ResetToDefaultState();
     }
 
     // 好感度スライダー表示の再更新メソッド

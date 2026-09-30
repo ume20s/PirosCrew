@@ -5006,6 +5006,42 @@ MonoBehaviour:
     - {fileID: 8300000, guid: 77802ab02571cdd4c8df88d803fe0a8a, type: 3}
     - {fileID: 8300000, guid: 5c7ac0919f2369e44b0c81d35831f3f6, type: 3}
     repeatVoice: {fileID: 8300000, guid: 90b39d75617812947997b56a9b3d7b17, type: 3}
+  characterItemPhotos:
+  - itemPhotos:
+    - {fileID: 21300000, guid: e7e85053818974f4fb2ce69e635f9e0b, type: 3}
+    - {fileID: 21300000, guid: 95bf0f4209c2b0d41a741991f7faf21f, type: 3}
+    - {fileID: 21300000, guid: 778057b0584b3fb47a54a0e94e622c4c, type: 3}
+    - {fileID: 21300000, guid: aac80399648b11d48879ea8d3584f46a, type: 3}
+    - {fileID: 21300000, guid: 026b99e33ee2c274784891dadc919cdc, type: 3}
+    repeatPhoto: {fileID: 21300000, guid: 114301d77627fd944a6c4c1c15c536ce, type: 3}
+  - itemPhotos:
+    - {fileID: 21300000, guid: 11b2bfe309cc4c74ba647935975eb9da, type: 3}
+    - {fileID: 21300000, guid: bfbc64c5013278f439794a308eac7d57, type: 3}
+    - {fileID: 21300000, guid: b9582f3daf353fe41a91ef412d4e5238, type: 3}
+    - {fileID: 21300000, guid: 7d1285cb6d5873645a1d7305ef11b9b6, type: 3}
+    - {fileID: 21300000, guid: ccfe771743319584e93a323a73db3502, type: 3}
+    repeatPhoto: {fileID: 21300000, guid: 8a40ffd4133e8e44db42b572bdeca4bc, type: 3}
+  - itemPhotos:
+    - {fileID: 21300000, guid: 1bc0e1c38f3845548a4a52809ab12064, type: 3}
+    - {fileID: 21300000, guid: 98a6114ffa649634caa32b2954ee11c7, type: 3}
+    - {fileID: 21300000, guid: 98a6114ffa649634caa32b2954ee11c7, type: 3}
+    - {fileID: 21300000, guid: a1bd79c9be397644cb78a3c45e817784, type: 3}
+    - {fileID: 21300000, guid: a1bd79c9be397644cb78a3c45e817784, type: 3}
+    repeatPhoto: {fileID: 21300000, guid: 1bc0e1c38f3845548a4a52809ab12064, type: 3}
+  - itemPhotos:
+    - {fileID: 21300000, guid: 139d8ca8e53b9d44d9eb5ff1253e12bb, type: 3}
+    - {fileID: 21300000, guid: fdefa931cc6841d4d839a436ae933976, type: 3}
+    - {fileID: 21300000, guid: ea69e6ad86516d142a4ef24ddf06d6d4, type: 3}
+    - {fileID: 21300000, guid: ecc33c41b4633a24fa7658ab5c3c41b9, type: 3}
+    - {fileID: 21300000, guid: 2cf7ef78f5ec18d428a3ea8f0c4ad22c, type: 3}
+    repeatPhoto: {fileID: 21300000, guid: 139d8ca8e53b9d44d9eb5ff1253e12bb, type: 3}
+  - itemPhotos:
+    - {fileID: 21300000, guid: c37c43dba6c99d4448070058e6d3d387, type: 3}
+    - {fileID: 21300000, guid: a4dbcf9ce6fda994baea1fbf5874af80, type: 3}
+    - {fileID: 21300000, guid: 6b5eb77cb3b1eae4e83329071b80b1b4, type: 3}
+    - {fileID: 21300000, guid: 0a59a69b88ff8ac49bc2b53beebb7cda, type: 3}
+    - {fileID: 21300000, guid: d553fce51c9e08148b0acc7012e080f6, type: 3}
+    repeatPhoto: {fileID: 21300000, guid: c37c43dba6c99d4448070058e6d3d387, type: 3}
   upSe: {fileID: 8300000, guid: 4bc271dd315061f41b27521ffe8cb836, type: 3}
   downSe: {fileID: 8300000, guid: af29d16132403934a871d21ae15f70b2, type: 3}
   favoriteItemImages:

@@ -5041,7 +5041,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 6b5eb77cb3b1eae4e83329071b80b1b4, type: 3}
     - {fileID: 21300000, guid: 0a59a69b88ff8ac49bc2b53beebb7cda, type: 3}
     - {fileID: 21300000, guid: d553fce51c9e08148b0acc7012e080f6, type: 3}
-    repeatPhoto: {fileID: 21300000, guid: c37c43dba6c99d4448070058e6d3d387, type: 3}
+    repeatPhoto: {fileID: 21300000, guid: c753493a245f7db4c981b44d32ec616e, type: 3}
   upSe: {fileID: 8300000, guid: 4bc271dd315061f41b27521ffe8cb836, type: 3}
   downSe: {fileID: 8300000, guid: af29d16132403934a871d21ae15f70b2, type: 3}
   favoriteItemImages:

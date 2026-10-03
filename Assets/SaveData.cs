@@ -137,6 +137,37 @@ public static class SaveData
         set => PlayerPrefs.SetInt(KEY_SELECTED_CHARACTER, (int)value);
     }
 
+    // 指定した写真（0〜7）が解放されているか
+    public static bool IsPhotoUnlocked(CharacterType type, int photoIndex)
+    {
+        return PlayerPrefs.GetInt($"PhotoUnlocked_{(int)type}_{photoIndex}", 0) == 1;
+    }
+
+    // 写真を解放し、CollectionCountを自動同期する
+    public static void UnlockPhoto(CharacterType type, int photoIndex)
+    {
+        PlayerPrefs.SetInt($"PhotoUnlocked_{(int)type}_{photoIndex}", 1);
+
+        // 解放済み枚数をカウントして更新
+        int count = 0;
+        for (int i = 0; i < 8; i++)
+        {
+            if (IsPhotoUnlocked(type, i)) count++;
+        }
+        SetCollectionCount(type, count); // コレクション枚数を保存[cite: 7]
+        Save();
+    }
+
+    // まだ解放されていない最初の写真インデックス（0〜7）を取得（全解放時は -1）
+    public static int GetNextPhotoToUnlock(CharacterType type)
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            if (!IsPhotoUnlocked(type, i)) return i;
+        }
+        return -1; // 8枚すべて解放済み
+    }
+
     public static void Save()
     {
         PlayerPrefs.Save();

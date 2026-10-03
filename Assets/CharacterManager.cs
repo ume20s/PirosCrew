@@ -34,6 +34,14 @@ public class CharacterPhotoData
     public Sprite repeatPhoto;
 }
 
+// キャラクターごとのご褒美スチルデータ
+[System.Serializable]
+public class CharacterRewardPhotoData
+{
+    [Header("ご褒美スチル")]
+    public Sprite[] rewardPhotos = new Sprite[8];
+}
+
 public class CharacterManager : MonoBehaviour
 {
 
@@ -91,6 +99,17 @@ public class CharacterManager : MonoBehaviour
     public Slider gatchanSlider;
     public Slider allbackSlider;
     public Slider nesanSlider;
+
+    [Header("ご褒美・コンプリート演出UI")]
+    public GameObject rewardModalPanel;       // ご褒美全画面パネル
+    public Image rewardPhotoImage;            // 獲得した写真を表示するImage
+    public Text rewardTitleText;              // 「写真GET！」などのテキスト
+    public Button rewardCloseButton;          // 閉じるボタン
+    public ParticleSystem congratulateEffect; // 紙吹雪/光などのパーティクル (任意)
+    public AudioClip rewardSe;                // ファンファーレ等の効果音 (任意)
+
+    [Header("キャラクター×ご褒美スチル写真")]
+    public CharacterRewardPhotoData[] characterRewardPhotos;
 
     // 現在の選択キャラクターと直近の選択アイテム
     private CharacterType currentCharacter;
@@ -535,9 +554,6 @@ public class CharacterManager : MonoBehaviour
         affectionPopText.gameObject.SetActive(false);
         rect.anchoredPosition = popTextDefaultPos; // 次回用に初期位置へ復帰
     }
-
-
-
 
     private IEnumerator HidePopTextAfterDelay(float delay)
     {

@@ -1,5 +1,8 @@
 using UnityEngine;
 using System;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public static class SaveData
 {
@@ -172,4 +175,25 @@ public static class SaveData
     {
         PlayerPrefs.Save();
     }
+
+// セーブデータを全削除する処理
+    public static void ClearAllData()
+    {
+        PlayerPrefs.DeleteAll();
+        PlayerPrefs.Save();
+        Debug.Log("<color=red>【デバッグ】すべてのセーブデータを全初期化しました。</color>");
+    }
 }
+
+#if UNITY_EDITOR
+public class SaveDataEditor
+{
+    // 既存メニューの「ウィンドウ」内に追加したい場合は "Window/Reset Save Data" に変更も可能です
+    [MenuItem("Tools/Reset Save Data")]
+    public static void ResetDataFromMenu()
+    {
+        SaveData.ClearAllData();
+        EditorUtility.DisplayDialog("データ初期化", "セーブデータをすべて初期化しました。", "OK");
+    }
+}
+#endif

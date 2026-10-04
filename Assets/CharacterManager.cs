@@ -34,12 +34,12 @@ public class CharacterPhotoData
     public Sprite repeatPhoto;
 }
 
-// キャラクターごとのご褒美スチルデータ
+// キャラクターごとのご褒美スチル写真データ（8枚）
 [System.Serializable]
-public class CharacterRewardPhotoData
+public class CharacterRewardPhotoGroup
 {
-    [Header("ご褒美スチル")]
-    public Sprite[] rewardPhotos = new Sprite[8];
+    [Header("ご褒美スチル写真 (0〜7)")]
+    public Sprite[] photos = new Sprite[8];
 }
 
 public class CharacterManager : MonoBehaviour
@@ -108,8 +108,8 @@ public class CharacterManager : MonoBehaviour
     public ParticleSystem congratulateEffect; // 紙吹雪/光などのパーティクル (任意)
     public AudioClip rewardSe;                // ファンファーレ等の効果音 (任意)
 
-    [Header("キャラクター×ご褒美スチル写真")]
-    public CharacterRewardPhotoData[] characterRewardPhotos;
+    [Header("キャラクターごとのご褒美スチル写真（5キャラ × 各8枚）")]
+    public CharacterRewardPhotoGroup[] characterRewardPhotos = new CharacterRewardPhotoGroup[5];
 
     // 現在の選択キャラクターと直近の選択アイテム
     private CharacterType currentCharacter;
@@ -144,7 +144,6 @@ public class CharacterManager : MonoBehaviour
 
     void Start()
     {
-        
         currentCharacter = SaveData.SelectedCharacter;  // 選択キャラクターを取得
 
         // ポップアップテキストの初期位置を保存
@@ -152,6 +151,17 @@ public class CharacterManager : MonoBehaviour
         {
             popTextDefaultPos = affectionPopText.rectTransform.anchoredPosition;
         }
+
+        // ご褒美・コンプリート演出UIは非表示にしておく
+        if (rewardCloseButton != null)
+        {
+            rewardCloseButton.onClick.AddListener(CloseRewardModal);
+        }
+        if (rewardModalPanel != null)
+        {
+            rewardModalPanel.SetActive(false);
+        }
+
 
         // 好感度低下のチェック
         SaveData.ApplyAffectionDecay();
@@ -336,9 +346,19 @@ public class CharacterManager : MonoBehaviour
 
         // 5. 保存とゲージの反映
         int currentAffection = SaveData.GetAffection(currentCharacter);
-        int newAffection = Mathf.Clamp(currentAffection + changeValue, 0, 100);
+        int newAffection = currentAffection + changeValue; //
 
-        SaveData.SetAffection(currentCharacter, newAffection);
+        // 100%に達したかの判定
+        if (newAffection >= 100)
+        {
+            HandleAffectionMax();   // 100%達成処理の呼び出し
+        }
+        else
+        {
+            newAffection = Mathf.Clamp(newAffection, 0, 100);
+            SaveData.SetAffection(currentCharacter, newAffection);
+            if (mainAffectionSlider != null) mainAffectionSlider.value = newAffection;
+        }
         SaveData.Save();
 
         if (mainAffectionSlider != null)
@@ -465,6 +485,12 @@ public class CharacterManager : MonoBehaviour
     {
         int charIndex = (int)currentCharacter;
         int clampedItemIndex = Mathf.Clamp(itemIndex, 0, 4);
+
+        // 8枚コンプリート済みの場合は好感度を変化させない（+0）
+        if (SaveData.GetCollectionCount(currentCharacter) >= 8)
+        {
+            return 0;
+        }
 
         // 連続タップペナルティ
         if (itemIndex == lastUsedItemIndex)
@@ -620,5 +646,92 @@ public class CharacterManager : MonoBehaviour
         }
         manaTimerText.text = string.Format("回復まであと {0:00}:{1:00}:{2:00}",
             remaining.Hours, remaining.Minutes, remaining.Seconds);
+    }
+
+    // 好感度100%達成時の処理
+    private void HandleAffectionMax()
+    {
+        // BGMを停止
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopBGM();
+        }
+
+        // 次に解放するスチル番号（0〜7）を取得
+        int nextPhotoIndex = SaveData.GetNextPhotoToUnlock(currentCharacter);
+
+        if (nextPhotoIndex != -1)
+        {
+            // スチル解放と記録
+            SaveData.UnlockPhoto(currentCharacter, nextPhotoIndex);
+
+            // ご褒美モーダルパネルの表示準備
+            int charIndex = (int)currentCharacter;
+            if (characterRewardPhotos != null && charIndex < characterRewardPhotos.Length)
+            {
+                Sprite[] currentPhotos = characterRewardPhotos[charIndex].photos;
+                if (rewardPhotoImage != null && currentPhotos != null && nextPhotoIndex < currentPhotos.Length)
+                {
+                    rewardPhotoImage.sprite = currentPhotos[nextPhotoIndex];
+                }
+            }
+
+            if (rewardTitleText != null)
+            {
+                rewardTitleText.text = $"ご褒美写真 No.{nextPhotoIndex + 1} 獲得！";
+            }
+
+            if (rewardModalPanel != null)
+            {
+                rewardModalPanel.SetActive(true);
+            }
+
+            // パーティクル演出・ファンファーレSEの再生
+            if (congratulateEffect != null) congratulateEffect.Play();
+            if (rewardSe != null && AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySE(rewardSe);
+            }
+        }
+        else
+        {
+            Debug.Log("すべてのスチルを獲得済みです！");
+        }
+    }
+
+    // ご褒美パネルを閉じる処理
+    private void CloseRewardModal()
+    {
+        // 1. ご褒美モーダル画面とパーティクルをオフ
+        if (rewardModalPanel != null)
+        {
+            rewardModalPanel.SetActive(false);
+        }
+        if (congratulateEffect != null)
+        {
+            congratulateEffect.Stop();
+        }
+
+        // 2. 好感度設定（8枚コンプリートなら100%固定、途中の枚数なら0%にリセット）
+        if (SaveData.GetCollectionCount(currentCharacter) >= 8)
+        {
+            SaveData.SetAffection(currentCharacter, 100);
+            if (mainAffectionSlider != null)
+            {
+                mainAffectionSlider.value = 100;
+            }
+        }
+        else
+        {
+            SaveData.SetAffection(currentCharacter, 0);
+            if (mainAffectionSlider != null)
+            {
+                mainAffectionSlider.value = 0;
+            }
+        }
+        SaveData.Save();
+
+        // 3. BGMを再開（オン）
+        PlayCharacterBGM();
     }
 }

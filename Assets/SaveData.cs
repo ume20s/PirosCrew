@@ -99,6 +99,25 @@ public static class SaveData
         return false;
     }
 
+    // キャプテンの解放条件を満たしたかをチェック
+    public static bool CheckAndUnlockCaptain()
+    {
+        if (IsCaptainUnlocked) return false; // 既に解放済みなら何もしない
+
+        for (int i = 0; i < 4; i++)
+        {
+            if (GetCollectionCount((CharacterType)i) < 8)
+            {
+                return false; // 1人でも8枚未満なら解放しない
+            }
+        }
+
+        IsCaptainUnlocked = true; // キャプテン解放！
+        Save();
+        return true; // 今回初めて解放された
+    }    
+
+    // 既にキャプテンが解放されているかをチェック
     public static bool IsCaptainUnlocked
     {
         get => PlayerPrefs.GetInt(KEY_CAPTAIN_UNLOCKED, 0) == 1;

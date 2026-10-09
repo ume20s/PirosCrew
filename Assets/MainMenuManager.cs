@@ -49,19 +49,33 @@ public class MainMenuManager : MonoBehaviour
         // SaveData.SetAffection(CharacterType.Allback, 30);
         // SaveData.SetAffection(CharacterType.Nesan, 40);
         // SaveData.SetAffection(CharacterType.Yuimarru, 1);
-        // SaveData.LastAffectionDecayTime = DateTime.Now.AddHours(-8);
+        // SaveData.SetCollectionCount(CharacterType.Gatchan, 7);
+        // SaveData.SetCollectionCount(CharacterType.Allback, 8);
+        // SaveData.SetCollectionCount(CharacterType.Nesan, 8);
+        // SaveData.SetCollectionCount(CharacterType.Yuimarru, 8);
+        SaveData.LastAffectionDecayTime = DateTime.Now.AddHours(-8);
         SaveData.Mana = 8;
         // SaveData.LastRecoveryTime = DateTime.Now.AddHours(-1.99);
-        SaveData.IsCaptainUnlocked = true;
+        // SaveData.IsCaptainUnlocked = true;
         SaveData.Save();
 
         // まず好感度低下処理を実行
         SaveData.ApplyAffectionDecay();
 
+        // キャプテンの解放チェック（今回初めて解放されたか？）
+        bool newlyUnlocked = SaveData.CheckAndUnlockCaptain();
+
+        // もろもろの初期処理
         InitializeBgm();
         LoadAndApplyData();
         UpdateManaDisplay();
         UpdateCaptainVisibility();
+
+        // キャプテンが新規解放された時は登場エフェクト
+        if (newlyUnlocked)
+        {
+            StartCoroutine(PlayCaptainAppearEffect());
+        }
     }
 
     // Update is called once per frame
@@ -189,7 +203,37 @@ public class MainMenuManager : MonoBehaviour
             remaining.Hours, remaining.Minutes, remaining.Seconds);
     }
 
-    // アキラさんがいたら表示
+    // キャプテン登場エフェクトコルーチン（演出例）
+    private IEnumerator PlayCaptainAppearEffect()
+    {
+        // 画面遷移直後の落ち着きを待つため少し待機
+        yield return new WaitForSeconds(0.5f);
+
+        // キャプテンのオブジェクトを一旦消して演出準備
+        if (captainPhoto != null) captainPhoto.transform.localScale = Vector3.zero;
+
+        // TODO: ここでファンファーレSEや登場ボイスを鳴らす
+        // if (AudioManager.Instance != null && captainAppearVoice != null)
+        //     AudioManager.Instance.PlaySE(captainAppearVoice);
+
+        // ポンっ！と大きく表示されるアニメーション
+        float timer = 0f;
+        float duration = 0.5f;
+        while (timer < duration)
+        {
+            timer += Time.deltaTime;
+            float scale = Mathf.Sin((timer / duration) * (Mathf.PI / 2)); // イージング
+            if (captainPhoto != null)
+                captainPhoto.transform.localScale = Vector3.one * scale;
+            yield return null;
+        }
+
+        if (captainPhoto != null) captainPhoto.transform.localScale = Vector3.one;
+
+        Debug.Log("【演出】キャプテンが華々しく登場しました！");
+    }
+
+    // キャプテンがいたら表示
     void UpdateCaptainVisibility()
     {
         if (captainPhoto != null)

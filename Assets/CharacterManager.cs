@@ -134,7 +134,7 @@ public class CharacterManager : MonoBehaviour
     private readonly int[,] itemAffectionValues = new int[,]
     {
         // item0, item1, item2, item3, item4
-        { 10, 7, 6, 9, 7 },   // 0: がっちゃんさん
+        { 10, 10, 6, 9, 7 },   // 0: がっちゃんさん
         { 2,  4, 8, 10, 6 },  // 1: おーるばっくさん
         { 2,  8, 9, 10, 6 },  // 2: ねーさん
         { 2,  8, 9, 10, 7 },  // 3: ゆいまーるさん

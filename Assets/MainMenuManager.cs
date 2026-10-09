@@ -30,7 +30,7 @@ public class MainMenuManager : MonoBehaviour
     [Header("BGM")]
     public AudioClip[] menuBgmClips;
 
-    [Header("キャラクター選択ボイス（0:がっちゃん, 1:おーるばっく, 2:ねえさん, 3:ゆいまーる, 4:キャプテン）")] // 追加
+    [Header("キャラクター選択ボイス（0:がっちゃん, 1:おーるばっく, 2:ねえさん, 3:ゆいまーる, 4:キャプテン）")]
     public AudioClip[] selectVoiceClips;
 
     // マナタイマー制御用
@@ -52,7 +52,7 @@ public class MainMenuManager : MonoBehaviour
         // SaveData.LastAffectionDecayTime = DateTime.Now.AddHours(-8);
         SaveData.Mana = 8;
         // SaveData.LastRecoveryTime = DateTime.Now.AddHours(-1.99);
-        // SaveData.IsCaptainUnlocked = true;
+        SaveData.IsCaptainUnlocked = true;
         SaveData.Save();
 
         // まず好感度低下処理を実行

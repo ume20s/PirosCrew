@@ -5012,7 +5012,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 2600, y: 1400}
+  m_SizeDelta: {x: 2200, y: 1660}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1226706948
 MonoBehaviour:
@@ -5034,7 +5034,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 0b0d26c6dafc0cd4cb472e595e8d0f1d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 959ac40491867754597ca2b3a1d48568, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -5371,11 +5371,11 @@ MonoBehaviour:
   voiceLinesCsv: {fileID: 4900000, guid: 7a838e69a316c294990d50154c7d0828, type: 3}
   backgroundImage: {fileID: 1226706948}
   characterBackgrounds:
-  - {fileID: 21300000, guid: 0b0d26c6dafc0cd4cb472e595e8d0f1d, type: 3}
-  - {fileID: 21300000, guid: 9ed7444e1f37b2444bb73474d52110b3, type: 3}
-  - {fileID: 21300000, guid: 940450f6925569e4f84c3cb21cf44a26, type: 3}
-  - {fileID: 21300000, guid: 805bb7bf1967050478d5a7f185af5413, type: 3}
-  - {fileID: 21300000, guid: d89be365d65b1fb48afd874c5db9da1f, type: 3}
+  - {fileID: 21300000, guid: 959ac40491867754597ca2b3a1d48568, type: 3}
+  - {fileID: 21300000, guid: 9e99ddee7e2fd144f8826005f5f848ff, type: 3}
+  - {fileID: 21300000, guid: fdf28794fdd86044a9ea065d3fd950b0, type: 3}
+  - {fileID: 21300000, guid: f40dd30cb71168a47b8ea205f11cce90, type: 3}
+  - {fileID: 21300000, guid: 9d4d52e2e5692e64ea66f040ec5965f9, type: 3}
   defaultCharacterPhotos:
   - {fileID: 21300000, guid: 114301d77627fd944a6c4c1c15c536ce, type: 3}
   - {fileID: 21300000, guid: 8a40ffd4133e8e44db42b572bdeca4bc, type: 3}

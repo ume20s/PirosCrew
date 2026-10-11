@@ -30,8 +30,11 @@ public class MainMenuManager : MonoBehaviour
     [Header("BGM")]
     public AudioClip[] menuBgmClips;
 
-    [Header("キャラクター選択ボイス（0:がっちゃん, 1:おーるばっく, 2:ねえさん, 3:ゆいまーる, 4:キャプテン）")]
+    [Header("キャラクター選択ボイス")]
     public AudioClip[] selectVoiceClips;
+
+    [Header("キャプテン登場ボイス")]
+    public AudioClip captainAppearVoice;
 
     // マナタイマー制御用
     private float timerUpdateInterval = 1.0f; // 1秒ごとに更新
@@ -56,7 +59,7 @@ public class MainMenuManager : MonoBehaviour
         SaveData.LastAffectionDecayTime = DateTime.Now.AddHours(-8);
         SaveData.Mana = 8;
         // SaveData.LastRecoveryTime = DateTime.Now.AddHours(-1.99);
-        // SaveData.IsCaptainUnlocked = true;
+        SaveData.IsCaptainUnlocked = false;
         SaveData.Save();
 
         // まず好感度低下処理を実行
@@ -203,7 +206,7 @@ public class MainMenuManager : MonoBehaviour
             remaining.Hours, remaining.Minutes, remaining.Seconds);
     }
 
-    // キャプテン登場エフェクトコルーチン（演出例）
+    // キャプテン登場エフェクトコルーチン
     private IEnumerator PlayCaptainAppearEffect()
     {
         // 画面遷移直後の落ち着きを待つため少し待機
@@ -216,7 +219,7 @@ public class MainMenuManager : MonoBehaviour
         // if (AudioManager.Instance != null && captainAppearVoice != null)
         //     AudioManager.Instance.PlaySE(captainAppearVoice);
 
-        // ポンっ！と大きく表示されるアニメーション
+        // 次第に大きく表示されるアニメーション
         float timer = 0f;
         float duration = 0.5f;
         while (timer < duration)

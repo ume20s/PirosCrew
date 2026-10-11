@@ -4722,6 +4722,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: a9323962abeff6e47a30e028430fda14, type: 3}
   - {fileID: 8300000, guid: 468e687beae02ca4ea7783ccd109983c, type: 3}
   - {fileID: 8300000, guid: 5cd1f55995ed7a848a3feadc3f84f2c1, type: 3}
+  captainAppearVoice: {fileID: 8300000, guid: 5fb52f07c981e2a43b5d1d6d0da24252, type: 3}
 --- !u!4 &1894554900
 Transform:
   m_ObjectHideFlags: 0

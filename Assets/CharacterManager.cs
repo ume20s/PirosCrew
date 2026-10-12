@@ -134,7 +134,7 @@ public class CharacterManager : MonoBehaviour
     private readonly int[,] itemAffectionValues = new int[,]
     {
         // item0, item1, item2, item3, item4
-        { 10, 10, 6, 9, 7 },   // 0: がっちゃんさん
+        { 55, 55, 6, 9, 7 },   // 0: がっちゃんさん
         { 2,  4, 8, 10, 6 },  // 1: おーるばっくさん
         { 2,  8, 9, 10, 6 },  // 2: ねーさん
         { 2,  8, 9, 10, 7 },  // 3: ゆいまーるさん
@@ -348,18 +348,37 @@ public class CharacterManager : MonoBehaviour
         int currentAffection = SaveData.GetAffection(currentCharacter);
         int newAffection = currentAffection + changeValue; //
 
-        // 100%に達したかの判定
-        if (newAffection >= 100)
+
+
+
+        // ★修正：すでに8枚コンプリートしているかどうかを判定
+        bool isAlreadyCompleted = (SaveData.GetCollectionCount(currentCharacter) >= 8);
+
+        // 100%に達したかの判定（ただし、すでにコンプリート済みの場合はモーダルを出さない）
+        if (!isAlreadyCompleted && newAffection >= 100)
         {
             HandleAffectionMax();   // 100%達成処理の呼び出し
         }
         else
         {
-            newAffection = Mathf.Clamp(newAffection, 0, 100);
+            // コンプリート済みの場合は100%に固定
+            if (isAlreadyCompleted)
+            {
+                newAffection = 100;
+            }
+            else
+            {
+                newAffection = Mathf.Clamp(newAffection, 0, 100);
+            }
+
             SaveData.SetAffection(currentCharacter, newAffection);
             if (mainAffectionSlider != null) mainAffectionSlider.value = newAffection;
         }
         SaveData.Save();
+
+
+
+
 
         if (mainAffectionSlider != null)
         {

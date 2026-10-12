@@ -50,7 +50,11 @@ public static class SaveData
             string str = PlayerPrefs.GetString(KEY_LAST_RECOVERY, "");
             if (long.TryParse(str, out long ticks))
                 return new DateTime(ticks);
-            return DateTime.Now;
+            
+            // ★未保存の場合は、現在の時間をセーブしてそれを基準にする
+            DateTime now = DateTime.Now;
+            LastRecoveryTime = now;
+            return now;
         }
         set => PlayerPrefs.SetString(KEY_LAST_RECOVERY, value.Ticks.ToString());
     }
@@ -63,7 +67,11 @@ public static class SaveData
             string str = PlayerPrefs.GetString(KEY_LAST_AFFECTION_DECAY, "");
             if (long.TryParse(str, out long ticks))
                 return new DateTime(ticks);
-            return DateTime.Now;
+            
+            // ★未保存の場合は、現在の時間をセーブしてそれを基準にする
+            DateTime now = DateTime.Now;
+            LastAffectionDecayTime = now;
+            return now;
         }
         set => PlayerPrefs.SetString(KEY_LAST_AFFECTION_DECAY, value.Ticks.ToString());
     }
@@ -190,12 +198,24 @@ public static class SaveData
         return -1; // 8枚すべて解放済み
     }
 
+    // キャラクターのコンプリート演出をメインメニューで再生済みか
+    public static bool IsCompletionEffectShown(CharacterType type)
+    {
+        return PlayerPrefs.GetInt($"CompletionEffectShown_{(int)type}", 0) == 1;
+    }
+
+    public static void SetCompletionEffectShown(CharacterType type, bool shown)
+    {
+        PlayerPrefs.SetInt($"CompletionEffectShown_{(int)type}", shown ? 1 : 0);
+        Save();
+    }
+
     public static void Save()
     {
         PlayerPrefs.Save();
     }
 
-// セーブデータを全削除する処理
+    // セーブデータを全削除する処理
     public static void ClearAllData()
     {
         PlayerPrefs.DeleteAll();

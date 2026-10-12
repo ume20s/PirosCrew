@@ -33,8 +33,10 @@ public class MainMenuManager : MonoBehaviour
     [Header("キャラクター選択ボイス")]
     public AudioClip[] selectVoiceClips;
 
-    [Header("キャプテン登場ボイス")]
-    public AudioClip captainAppearVoice;
+    [Header("コンプリート演出・バラの花（0:がっちゃん, 1:おーるばっく, 2:ねえさん, 3:ゆいまーる）")]
+    public GameObject[] completeRoseObjects;       // 各キャラの写真上に配置するバラの花のオブジェクト
+    public ParticleSystem menuCongratulateEffect; // メインメニュー用の紙吹雪パーティクル
+    public AudioClip menuRewardSe;                // コンプリート時のファンファーレSE
 
     // マナタイマー制御用
     private float timerUpdateInterval = 1.0f; // 1秒ごとに更新
@@ -62,6 +64,7 @@ public class MainMenuManager : MonoBehaviour
         // SaveData.IsCaptainUnlocked = false;
         SaveData.Save();
 
+
         // まず好感度低下処理を実行
         SaveData.ApplyAffectionDecay();
 
@@ -69,10 +72,15 @@ public class MainMenuManager : MonoBehaviour
         bool newlyUnlocked = SaveData.CheckAndUnlockCaptain();
 
         // もろもろの初期処理
-        InitializeBgm();
         LoadAndApplyData();
         UpdateManaDisplay();
         UpdateCaptainVisibility();
+
+        // 各キャラクターのバラの花表示
+        UpdateCompleteRoses();
+        
+        // ★コンプリート演出のチェック（ここで演出があればBGMは鳴らさず、なければBGMを初期化する）
+        CheckAndPlayMenuCompletionEffect();
 
         // キャプテンが新規解放された時は登場エフェクト
         if (newlyUnlocked)
@@ -181,7 +189,7 @@ public class MainMenuManager : MonoBehaviour
         }
     }
 
-    // 残り時間タイマーテキストの表示更新
+    // 残り時間タイマーテキストの表示更新（余り時間計算方式）
     void UpdateManaTimer()
     {
         if (manaTimerText == null) return;
@@ -192,16 +200,19 @@ public class MainMenuManager : MonoBehaviour
             return;
         }
 
-        // 次の1個が回復するまでの時間を計算
-        DateTime nextRecovery = SaveData.LastRecoveryTime.AddHours(2);
-        TimeSpan remaining = nextRecovery - DateTime.Now;
+        // 最後に基準となった時間からの経過時間を計算
+        TimeSpan elapsed = DateTime.Now - SaveData.LastRecoveryTime;
+        double totalSeconds = elapsed.TotalSeconds;
 
-        if (remaining.TotalSeconds <= 0)
-        {
-            // 念のため再チェック
-            RecoverManaIfNeeded();
-            remaining = TimeSpan.Zero;
-        }
+        // 2時間（7200秒）を1ターンの間隔とする
+        double intervalSeconds = 7200.0;
+
+        // 次の1個が回復するまでの残り秒数（7200秒から経過秒数の余りを引く）
+        double remainingSeconds = intervalSeconds - (totalSeconds % intervalSeconds);
+        if (remainingSeconds < 0) remainingSeconds = 0;
+
+        TimeSpan remaining = TimeSpan.FromSeconds(remainingSeconds);
+
         manaTimerText.text = string.Format("回復まであと {0:00}:{1:00}:{2:00}",
             remaining.Hours, remaining.Minutes, remaining.Seconds);
     }
@@ -303,5 +314,94 @@ public class MainMenuManager : MonoBehaviour
         SceneManager.LoadScene("Character");
     }
 
+    // 8枚コンプリートしているキャラのバラの花を表示
+    void UpdateCompleteRoses()
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            CharacterType type = (CharacterType)i;
+            bool isCompleted = (SaveData.GetCollectionCount(type) >= 8);
 
+            if (completeRoseObjects != null && i < completeRoseObjects.Length && completeRoseObjects[i] != null)
+            {
+                completeRoseObjects[i].SetActive(isCompleted);
+            }
+        }
+    }
+
+    // メインメニューに戻ってきたとき、未読のコンプリートがあれば演出を再生
+    void CheckAndPlayMenuCompletionEffect()
+    {
+        bool hasPlayedEffect = false;
+
+        for (int i = 0; i < 4; i++)
+        {
+            CharacterType type = (CharacterType)i;
+            
+            // 8枚コンプリートしていて、まだメインメニューの演出を見ていない場合
+            if (SaveData.GetCollectionCount(type) >= 8 && !SaveData.IsCompletionEffectShown(type))
+            {
+                // 演出を既読にする
+                SaveData.SetCompletionEffectShown(type, true);
+
+                // キャラクターを指定してコルーチンを呼び出す
+                StartCoroutine(PlayMenuCompletionEffectRoutine(i));
+                hasPlayedEffect = true;
+                break; 
+            }
+        }
+
+        // ★もしコンプリート演出が再生されない（通常の起動や、すでに演出済みの）場合は、ここでBGMを初期化・再生する
+        if (!hasPlayedEffect)
+        {
+            InitializeBgm();
+        }
+    }
+
+    // メインメニューでのコンプリート凱旋演出コルーチン
+    private IEnumerator PlayMenuCompletionEffectRoutine(int charIndex)
+    {
+        // 画面が落ち着くのを少し待つ
+        yield return new WaitForSeconds(0.4f);
+
+        // パーティクルの位置を、該当キャラクターの写真の位置に合わせる
+        if (menuCongratulateEffect != null && characterPhotos != null && charIndex < characterPhotos.Length)
+        {
+            if (characterPhotos[charIndex] != null)
+            {
+                // キャラクターの写真のワールド座標をパーティクルにコピー
+                menuCongratulateEffect.transform.position = characterPhotos[charIndex].transform.position;
+            }
+        }
+
+        // エフェクト前にBGMを停止して静かにする
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopBGM();
+        }
+
+        // 1. ファンファーレSEの再生
+        if (menuRewardSe != null && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySE(menuRewardSe);
+        }
+
+        // 2. 紙吹雪パーティクルの再生
+        if (menuCongratulateEffect != null)
+        {
+            menuCongratulateEffect.Play();
+        }
+
+        // 演出の余韻を数秒待つ
+        yield return new WaitForSeconds(7.0f);
+
+        // パーティクル停止
+        if (menuCongratulateEffect != null)
+        {
+            menuCongratulateEffect.Stop();
+        }
+
+        // BGM再生
+        InitializeBgm();
+    }
 }

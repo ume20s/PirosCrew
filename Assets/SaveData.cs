@@ -51,7 +51,7 @@ public static class SaveData
             if (long.TryParse(str, out long ticks))
                 return new DateTime(ticks);
             
-            // ★未保存の場合は、現在の時間をセーブしてそれを基準にする
+            // 未保存の場合は、現在の時間をセーブしてそれを基準にする
             DateTime now = DateTime.Now;
             LastRecoveryTime = now;
             return now;
@@ -68,7 +68,7 @@ public static class SaveData
             if (long.TryParse(str, out long ticks))
                 return new DateTime(ticks);
             
-            // ★未保存の場合は、現在の時間をセーブしてそれを基準にする
+            // 未保存の場合は、現在の時間をセーブしてそれを基準にする
             DateTime now = DateTime.Now;
             LastAffectionDecayTime = now;
             return now;
@@ -130,6 +130,13 @@ public static class SaveData
     {
         get => PlayerPrefs.GetInt(KEY_CAPTAIN_UNLOCKED, 0) == 1;
         set => PlayerPrefs.SetInt(KEY_CAPTAIN_UNLOCKED, value ? 1 : 0);
+    }
+
+    // キャプテンの初登場演出をメインメニューで再生済みか
+    public static bool IsCaptainAppearShown
+    {
+        get => PlayerPrefs.GetInt("CaptainAppearShown", 0) == 1;
+        set => PlayerPrefs.SetInt("CaptainAppearShown", value ? 1 : 0);
     }
 
     // BGMオン/オフ（true = オン）

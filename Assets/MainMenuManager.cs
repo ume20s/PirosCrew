@@ -33,7 +33,7 @@ public class MainMenuManager : MonoBehaviour
     [Header("キャラクター選択ボイス")]
     public AudioClip[] selectVoiceClips;
 
-    [Header("コンプリート演出・バラの花（0:がっちゃん, 1:おーるばっく, 2:ねえさん, 3:ゆいまーる）")]
+    [Header("コンプリート演出・バラの花")]
     public GameObject[] completeRoseObjects;       // 各キャラの写真上に配置するバラの花のオブジェクト
     public ParticleSystem menuCongratulateEffect; // メインメニュー用の紙吹雪パーティクル
     public AudioClip menuRewardSe;                // コンプリート時のファンファーレSE

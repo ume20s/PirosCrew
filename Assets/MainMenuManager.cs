@@ -34,9 +34,16 @@ public class MainMenuManager : MonoBehaviour
     public AudioClip[] selectVoiceClips;
 
     [Header("コンプリート演出・バラの花")]
-    public GameObject[] completeRoseObjects;       // 各キャラの写真上に配置するバラの花のオブジェクト
-    public ParticleSystem menuCongratulateEffect; // メインメニュー用の紙吹雪パーティクル
+    public GameObject[] completeRoseObjects;      // バラの花のオブジェクト
+    public ParticleSystem menuCongratulateEffect; // 紙吹雪パーティクル
     public AudioClip menuRewardSe;                // コンプリート時のファンファーレSE
+
+    [Header("演出・入力ブロック用")]
+    public GameObject inputBlockPanel;       // 演出中のタップ防止用パネル
+    
+    [Header("キャプテン登場演出用")]
+    public AudioClip captainAppearBgm;       // ツァラトゥストラ
+    public AudioClip captainAppearVoice;     // 「待たせたな！」ボイス
 
     // マナタイマー制御用
     private float timerUpdateInterval = 1.0f; // 1秒ごとに更新
@@ -49,43 +56,41 @@ public class MainMenuManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // テスト用（確認後削除）
-        // SaveData.SetAffection(CharacterType.Gatchan, 80);
-        // SaveData.SetAffection(CharacterType.Allback, 30);
-        // SaveData.SetAffection(CharacterType.Nesan, 40);
-        // SaveData.SetAffection(CharacterType.Yuimarru, 1);
-        // SaveData.SetCollectionCount(CharacterType.Gatchan, 6);
-        // SaveData.SetCollectionCount(CharacterType.Allback, 8);
-        // SaveData.SetCollectionCount(CharacterType.Nesan, 8);
-        // SaveData.SetCollectionCount(CharacterType.Yuimarru, 8);
-        // SaveData.LastAffectionDecayTime = DateTime.Now.AddHours(-8);
         SaveData.Mana = 9;
-        // SaveData.LastRecoveryTime = DateTime.Now.AddHours(-1.99);
-        // SaveData.IsCaptainUnlocked = false;
         SaveData.Save();
-
 
         // まず好感度低下処理を実行
         SaveData.ApplyAffectionDecay();
 
-        // キャプテンの解放チェック（今回初めて解放されたか？）
-        bool newlyUnlocked = SaveData.CheckAndUnlockCaptain();
+        // キャプテンの解放チェック
+        SaveData.CheckAndUnlockCaptain();
 
         // もろもろの初期処理
         LoadAndApplyData();
         UpdateManaDisplay();
         UpdateCaptainVisibility();
-
-        // 各キャラクターのバラの花表示
         UpdateCompleteRoses();
-        
-        // ★コンプリート演出のチェック（ここで演出があればBGMは鳴らさず、なければBGMを初期化する）
-        CheckAndPlayMenuCompletionEffect();
 
-        // キャプテンが新規解放された時は登場エフェクト
-        if (newlyUnlocked)
+        // キャプテン登場演出が未読かどうかを判定
+        bool isAllCompleted = true;
+        for (int i = 0; i < 4; i++)
         {
-            StartCoroutine(PlayCaptainAppearEffect());
+            if (SaveData.GetCollectionCount((CharacterType)i) < 8)
+            {
+                isAllCompleted = false;
+                break;
+            }
+        }
+
+        if (isAllCompleted && !SaveData.IsCaptainAppearShown)
+        {
+            // 初回の4人コンプリート＆キャプテン初登場エフェクトを開始
+            StartCoroutine(PlayMasterpieceAppearSequence());
+        }
+        else
+        {
+            // 通常起動時
+            CheckAndPlayMenuCompletionEffect();
         }
     }
 
@@ -247,15 +252,18 @@ public class MainMenuManager : MonoBehaviour
         Debug.Log("【演出】キャプテンが華々しく登場しました！");
     }
 
-    // キャプテンがいたら表示
+    // キャプテンがいたら表示（ただし初登場演出を見るまでは非表示を死守）
     void UpdateCaptainVisibility()
     {
         if (captainPhoto != null)
         {
-            captainPhoto.SetActive(SaveData.IsCaptainUnlocked);
-            captainTextBack.SetActive(SaveData.IsCaptainUnlocked);
-            captainAffect.SetActive(SaveData.IsCaptainUnlocked);
-            captainCollec.SetActive(SaveData.IsCaptainUnlocked);
+            // ★修正：解放されていて、かつ初登場演出が済んでいる場合のみ表示する
+            bool shouldShow = SaveData.IsCaptainUnlocked && SaveData.IsCaptainAppearShown;
+
+            captainPhoto.SetActive(shouldShow);
+            captainTextBack.SetActive(shouldShow);
+            captainAffect.SetActive(shouldShow);
+            captainCollec.SetActive(shouldShow);
         }
     }
 
@@ -351,7 +359,7 @@ public class MainMenuManager : MonoBehaviour
             }
         }
 
-        // ★もしコンプリート演出が再生されない（通常の起動や、すでに演出済みの）場合は、ここでBGMを初期化・再生する
+        // もしコンプリート演出が再生されない場合は、ここでBGMを初期化・再生する
         if (!hasPlayedEffect)
         {
             InitializeBgm();
@@ -403,5 +411,115 @@ public class MainMenuManager : MonoBehaviour
 
         // BGM再生
         InitializeBgm();
+    }
+
+    // 4人目コンプリートからキャプテン登場までの完全版ドラマチック演出
+    private IEnumerator PlayMasterpieceAppearSequence()
+    {
+        // ★追加：4人全員のコンプリート演出は「既読」にしておき、通常のコンプリート演出が誤爆するのを防ぐ
+        for (int i = 0; i < 4; i++)
+        {
+            SaveData.SetCompletionEffectShown((CharacterType)i, true);
+        }
+
+        // 2) メインメニューに遷移した瞬間、全てのタップ等を完全ブロック
+        if (inputBlockPanel != null) inputBlockPanel.SetActive(true);
+        isTransitioning = true; // 操作受付フラグもガード
+
+        // BGMはOFFのまま静寂を保つ
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.StopBGM();
+        }
+
+        // 画面が落ち着くのを少し待つ
+        yield return new WaitForSeconds(0.5f);
+
+        // 3) 4人目の通常のご褒美写真8枚コンプリートエフェクト（ファンファーレ＆紙吹雪）
+        int lastCharIndex = 3; // 4人目のインデックス
+        if (menuCongratulateEffect != null && characterPhotos != null && lastCharIndex < characterPhotos.Length)
+        {
+            if (characterPhotos[lastCharIndex] != null)
+            {
+                menuCongratulateEffect.transform.position = characterPhotos[lastCharIndex].transform.position;
+            }
+            menuCongratulateEffect.gameObject.SetActive(true);
+            menuCongratulateEffect.Play();
+        }
+
+        if (menuRewardSe != null && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySE(menuRewardSe);
+        }
+
+        // 紙吹雪とファンファーレの余韻を待つ
+        yield return new WaitForSeconds(3.5f);
+
+        if (menuCongratulateEffect != null)
+        {
+            menuCongratulateEffect.Stop();
+        }
+
+        // 3) ひと拍子、間を置く
+        yield return new WaitForSeconds(1.0f);
+
+        // キャプテンの写真オブジェクト等の初期状態（サイズ0、表示状態へ）
+        if (captainPhoto != null)
+        {
+            captainPhoto.SetActive(true);
+            captainPhoto.transform.localScale = Vector3.zero;
+        }
+        if (captainTextBack != null) captainTextBack.SetActive(false);
+        if (captainAffect != null) captainAffect.SetActive(false);
+        if (captainCollec != null) captainCollec.SetActive(false);
+
+        // 4) ツァラトウストラ再生開始
+        if (captainAppearBgm != null && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySE(captainAppearBgm); 
+        }
+
+        // 5) ツァラトウストラ再生開始から「7秒程度」あとからキャプテン写真がニューっと大きくなる
+        yield return new WaitForSeconds(7.0f);
+
+        float expandTimer = 0f;
+        float expandDuration = 2.5f; 
+        while (expandTimer < expandDuration)
+        {
+            expandTimer += Time.deltaTime;
+            float t = Mathf.Clamp01(expandTimer / expandDuration);
+            float scale = Mathf.SmoothStep(0f, 1f, t); 
+
+            if (captainPhoto != null)
+            {
+                captainPhoto.transform.localScale = Vector3.one * scale;
+            }
+            yield return null;
+        }
+        if (captainPhoto != null) captainPhoto.transform.localScale = Vector3.one;
+
+        // 6) ツァラトウストラ再生終了までの残り時間を調整
+        yield return new WaitForSeconds(7.5f);
+
+        // 7) キャプテンの「待たせたな」のセリフ再生
+        float voiceLength = 2.0f;
+        if (captainAppearVoice != null && AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySE(captainAppearVoice);
+            voiceLength = captainAppearVoice.length;
+        }
+        yield return new WaitForSeconds(voiceLength + 0.5f);
+
+        // 8) 演出既読フラグを保存し、キャプテンのUI常時表示を有効化
+        SaveData.IsCaptainAppearShown = true; 
+        UpdateCaptainVisibility(); // これでキャプテンが通常表示されるようになります
+
+        isTransitioning = false;
+        if (inputBlockPanel != null) inputBlockPanel.SetActive(false);
+
+        // メインメニューの通常BGMを開始
+        InitializeBgm();
+
+        Debug.Log("【演出完了】キャプテン降臨の全ドラマが完了しました！");
     }
 }

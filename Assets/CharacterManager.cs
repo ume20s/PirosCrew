@@ -134,11 +134,17 @@ public class CharacterManager : MonoBehaviour
     private readonly int[,] itemAffectionValues = new int[,]
     {
         // item0, item1, item2, item3, item4
-        { 55, 55, 6, 9, 7 },   // 0: がっちゃんさん
-        { 2,  4, 8, 10, 6 },  // 1: おーるばっくさん
-        { 2,  8, 9, 10, 6 },  // 2: ねーさん
-        { 2,  8, 9, 10, 7 },  // 3: ゆいまーるさん
-        { 10, 10, 10, 10, 10 } // 4: キャプテン
+        // { 10,10, 6,  9, 7 },   // 0: がっちゃんさん
+        // { 2,  4, 8, 10, 6 },  // 1: おーるばっくさん
+        // { 2,  8, 9, 10, 6 },  // 2: ねーさん
+        // { 2,  8, 9, 10, 7 },  // 3: ゆいまーるさん
+        // { 10, 10, 10, 10, 10 } // 4: キャプテン
+
+        { 55, 55, 55, 55, 55 },   // 0: がっちゃんさん
+        { 55, 55, 55, 55, 55 },  // 1: おーるばっくさん
+        { 55, 55, 55, 55, 55 },  // 2: ねーさん
+        { 55, 55, 55, 55, 55 },  // 3: ゆいまーるさん
+        { 55, 55, 55, 55, 55 } // 4: キャプテン
     };
     private Vector2 popTextDefaultPos; // 好感度ポップアップ初期位置保存用
 
@@ -721,6 +727,9 @@ public class CharacterManager : MonoBehaviour
     // ご褒美パネルを閉じる処理
     private void CloseRewardModal()
     {
+        // 8枚コンプリート状態かどうかを閉じる前に判定しておく
+        bool isCompleted = (SaveData.GetCollectionCount(currentCharacter) >= 8);
+
         // 1. ご褒美モーダル画面とパーティクルをオフ
         if (rewardModalPanel != null)
         {
@@ -732,7 +741,7 @@ public class CharacterManager : MonoBehaviour
         }
 
         // 2. 好感度設定（8枚コンプリートなら100%固定、途中の枚数なら0%にリセット）
-        if (SaveData.GetCollectionCount(currentCharacter) >= 8)
+        if (isCompleted)
         {
             SaveData.SetAffection(currentCharacter, 100);
             if (mainAffectionSlider != null)
@@ -750,7 +759,20 @@ public class CharacterManager : MonoBehaviour
         }
         SaveData.Save();
 
-        // 3. BGMを再開（オン）
-        PlayCharacterBGM();
+        // 3. 遷移またはBGM再開の分岐
+        if (isCompleted)
+        {
+            // ★ 8枚コンプリート時：BGMを止めてメインメニューへ遷移
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.StopBGM();
+            }
+            UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+        }
+        else
+        {
+            // 1〜7枚目獲得時：BGMを再開してそのままキャラクター画面を継続
+            PlayCharacterBGM();
+        }
     }
 }

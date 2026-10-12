@@ -52,14 +52,14 @@ public class MainMenuManager : MonoBehaviour
         // SaveData.SetAffection(CharacterType.Allback, 30);
         // SaveData.SetAffection(CharacterType.Nesan, 40);
         // SaveData.SetAffection(CharacterType.Yuimarru, 1);
-        // SaveData.SetCollectionCount(CharacterType.Gatchan, 7);
+        // SaveData.SetCollectionCount(CharacterType.Gatchan, 6);
         // SaveData.SetCollectionCount(CharacterType.Allback, 8);
         // SaveData.SetCollectionCount(CharacterType.Nesan, 8);
         // SaveData.SetCollectionCount(CharacterType.Yuimarru, 8);
-        SaveData.LastAffectionDecayTime = DateTime.Now.AddHours(-8);
-        SaveData.Mana = 8;
+        // SaveData.LastAffectionDecayTime = DateTime.Now.AddHours(-8);
+        SaveData.Mana = 9;
         // SaveData.LastRecoveryTime = DateTime.Now.AddHours(-1.99);
-        SaveData.IsCaptainUnlocked = false;
+        // SaveData.IsCaptainUnlocked = false;
         SaveData.Save();
 
         // まず好感度低下処理を実行

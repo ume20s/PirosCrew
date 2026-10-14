@@ -480,7 +480,7 @@ public class MainMenuManager : MonoBehaviour
         }
 
         // 5) ツァラトウストラ再生開始から「7秒程度」あとからキャプテン写真がニューっと大きくなる
-        yield return new WaitForSeconds(7.0f);
+        yield return new WaitForSeconds(9.0f);
 
         float expandTimer = 0f;
         float expandDuration = 2.5f; 
@@ -499,7 +499,7 @@ public class MainMenuManager : MonoBehaviour
         if (captainPhoto != null) captainPhoto.transform.localScale = Vector3.one;
 
         // 6) ツァラトウストラ再生終了までの残り時間を調整
-        yield return new WaitForSeconds(7.5f);
+        yield return new WaitForSeconds(5.0f);
 
         // 7) キャプテンの「待たせたな」のセリフ再生
         float voiceLength = 2.0f;
@@ -523,7 +523,31 @@ public class MainMenuManager : MonoBehaviour
         Debug.Log("【演出完了】キャプテン降臨の全ドラマが完了しました！");
     }
 
-    // メインメニュー等のスクリプトに追加する例
+    // 【デバッグ用】一瞬でキャプテン登場直前の状態（4人コンプリート＆演出未読）にする
+    public void OnClickTriggerCaptainAppearTest()
+    {
+        // 1. 4人全員のコレクション数を8枚にする
+        for (int i = 0; i < 4; i++)
+        {
+            SaveData.SetCollectionCount((CharacterType)i, 8);
+        }
+
+        // 2. キャプテンを解放状態にする
+        SaveData.IsCaptainUnlocked = true;
+
+        // 3. キャプテン登場演出を「未読（未再生）」に戻す
+        SaveData.IsCaptainAppearShown = false;
+
+        // 4. セーブを確定
+        SaveData.Save();
+
+        Debug.Log("<color=cyan>【デバッグ】キャプテン登場イベントのテスト状態にセットしました。シーンを再読み込みします。</color>");
+
+        // 5. シーンを再読み込みして即座にイベントを発生させる
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    // 【デバッグ用】セーブデータ全初期化
     public void OnClickResetDataButton()
     {
         SaveData.ClearAllData();

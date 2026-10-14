@@ -522,4 +522,12 @@ public class MainMenuManager : MonoBehaviour
 
         Debug.Log("【演出完了】キャプテン降臨の全ドラマが完了しました！");
     }
+
+    // メインメニュー等のスクリプトに追加する例
+    public void OnClickResetDataButton()
+    {
+        SaveData.ClearAllData();
+        // データを消去した後にシーンを再読み込みして即座に反映させる
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
+    }
 }

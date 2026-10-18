@@ -10405,7 +10405,7 @@ MonoBehaviour:
   menuRewardSe: {fileID: 8300000, guid: 9794b5f807f5e6042a84da7b32644575, type: 3}
   inputBlockPanel: {fileID: 185155532}
   captainAppearBgm: {fileID: 8300000, guid: c2f78423f79fc1c439c9cd606a9038f7, type: 3}
-  captainAppearVoice: {fileID: 8300000, guid: 5fb52f07c981e2a43b5d1d6d0da24252, type: 3}
+  captainAppearVoice: {fileID: 8300000, guid: 8c97d92c512473140a49d820100c4de0, type: 3}
 --- !u!4 &1894554900
 Transform:
   m_ObjectHideFlags: 0

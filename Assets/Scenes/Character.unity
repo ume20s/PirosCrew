@@ -5447,7 +5447,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 778057b0584b3fb47a54a0e94e622c4c, type: 3}
     - {fileID: 21300000, guid: aac80399648b11d48879ea8d3584f46a, type: 3}
     - {fileID: 21300000, guid: 026b99e33ee2c274784891dadc919cdc, type: 3}
-    repeatPhoto: {fileID: 21300000, guid: 114301d77627fd944a6c4c1c15c536ce, type: 3}
+    repeatPhoto: {fileID: 21300000, guid: 91dbc852cad028a449025d841ccc5d8e, type: 3}
   - itemPhotos:
     - {fileID: 21300000, guid: 11b2bfe309cc4c74ba647935975eb9da, type: 3}
     - {fileID: 21300000, guid: bfbc64c5013278f439794a308eac7d57, type: 3}

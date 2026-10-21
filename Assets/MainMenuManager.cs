@@ -56,8 +56,8 @@ public class MainMenuManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        SaveData.Mana = 9;
-        SaveData.Save();
+        // SaveData.Mana = 9;
+        // SaveData.Save();
 
         // まず好感度低下処理を実行
         SaveData.ApplyAffectionDecay();
@@ -257,7 +257,7 @@ public class MainMenuManager : MonoBehaviour
     {
         if (captainPhoto != null)
         {
-            // ★修正：解放されていて、かつ初登場演出が済んでいる場合のみ表示する
+            // 解放されていて、かつ初登場演出が済んでいる場合のみ表示する
             bool shouldShow = SaveData.IsCaptainUnlocked && SaveData.IsCaptainAppearShown;
 
             captainPhoto.SetActive(shouldShow);
@@ -416,7 +416,7 @@ public class MainMenuManager : MonoBehaviour
     // 4人目コンプリートからキャプテン登場までの完全版ドラマチック演出
     private IEnumerator PlayMasterpieceAppearSequence()
     {
-        // ★追加：4人全員のコンプリート演出は「既読」にしておき、通常のコンプリート演出が誤爆するのを防ぐ
+        // 4人全員のコンプリート演出は「既読」にしておき、通常のコンプリート演出が誤爆するのを防ぐ
         for (int i = 0; i < 4; i++)
         {
             SaveData.SetCompletionEffectShown((CharacterType)i, true);
